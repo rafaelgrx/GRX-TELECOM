@@ -1,0 +1,120 @@
+{
+  "environment": "Chromium automatizado, HTTP localhost; falhas simuladas de quota",
+  "tests": [
+    {
+      "name": "Compatibilidade de login com hash da versão original",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Comprovante 3200px reduzido a 1600px e salvo no IndexedDB",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Ampliar comprovante e fechar por Escape",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Backup restaura comprovante integral e mantém conta legada",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Backup inválido recusado sem substituir base",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Cadastro de veículo",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Cadastro local de usuário com PBKDF2",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Layout sem overflow nas quatro seções: 320px",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Layout sem overflow nas quatro seções: 360px",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Layout sem overflow nas quatro seções: 390px",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Layout sem overflow nas quatro seções: 768px",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Layout sem overflow nas quatro seções: 1024px",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Layout sem overflow nas quatro seções: 1440px",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Layout sem overflow nas quatro seções: 1920px",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Impressão isola relatório e oculta botões de alteração",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Acessibilidade automática sem violações sérias/críticas: manut",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Acessibilidade automática sem violações sérias/críticas: cons",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Acessibilidade automática sem violações sérias/críticas: cad",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "PWA abre offline após cache com login local e foto preservados",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Lançamento local salvo sem conexão",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Falha de quota não grava nem apaga formulário",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Outra aba invalida snapshot antigo e impede sobrescrita",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Sem exceções JavaScript nos testes extras",
+      "status": "PASS",
+      "detail": ""
+    }
+  ]
+}

@@ -1,0 +1,249 @@
+{
+  "app": "GRX 2.0",
+  "tests": [
+    {
+      "name": "chromium 1440 criar administrador",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 1440 rejeitar senha incorreta",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 1440 login correto",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 1440 manutenção: valor, KM e XSS escapado",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 1440 editar sem duplicar",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 1440 KM inválido recusado",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 1440 alimentação e valor inválido recusado",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 1440 consulta e período",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 1440 CSV com veículo, KM e valor",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 1440 backup sem hashes de senha",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 1440 importar preserva conta",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 1440 sem rolagem horizontal",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 1440 persistência após recarregar",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 1440 exclusão confirmada",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 1440 logout e bloqueio de redefinição",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 1440 sem exceções JavaScript",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 390 criar administrador",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 390 rejeitar senha incorreta",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 390 login correto",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 390 manutenção: valor, KM e XSS escapado",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 390 editar sem duplicar",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 390 KM inválido recusado",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 390 alimentação e valor inválido recusado",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 390 consulta e período",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 390 CSV com veículo, KM e valor",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 390 backup sem hashes de senha",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 390 importar preserva conta",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 390 sem rolagem horizontal",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 390 persistência após recarregar",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 390 exclusão confirmada",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 390 logout e bloqueio de redefinição",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "chromium 390 sem exceções JavaScript",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "firefox 1366 criar administrador",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "firefox 1366 rejeitar senha incorreta",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "firefox 1366 login correto",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "firefox 1366 manutenção: valor, KM e XSS escapado",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "firefox 1366 editar sem duplicar",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "firefox 1366 KM inválido recusado",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "firefox 1366 alimentação e valor inválido recusado",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "firefox 1366 consulta e período",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "firefox 1366 CSV com veículo, KM e valor",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "firefox 1366 backup sem hashes de senha",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "firefox 1366 importar preserva conta",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "firefox 1366 sem rolagem horizontal",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "firefox 1366 persistência após recarregar",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "firefox 1366 exclusão confirmada",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "firefox 1366 logout e bloqueio de redefinição",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "firefox 1366 sem exceções JavaScript",
+      "status": "PASS",
+      "detail": ""
+    }
+  ],
+  "limitations": [
+    "Sem projeto Supabase real; testes de API usam simulação quando indicados.",
+    "Navegadores automatizados não substituem testes em aparelhos físicos. WebKit encerrou ao iniciar neste ambiente e não foi validado."
+  ]
+}

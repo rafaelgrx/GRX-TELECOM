@@ -1,0 +1,69 @@
+{
+  "environment": "PGlite PostgreSQL WASM; schemas auth/storage simulados; não é um projeto Supabase real",
+  "tests": [
+    {
+      "name": "SQL completo executa em PostgreSQL WASM (schemas Supabase simulados)",
+      "status": "PASS"
+    },
+    {
+      "name": "SQL pode ser reaplicado sem duplicar estruturas",
+      "status": "PASS"
+    },
+    {
+      "name": "Membro grava autoria própria",
+      "status": "PASS"
+    },
+    {
+      "name": "Membro não falsifica autoria",
+      "status": "PASS"
+    },
+    {
+      "name": "Cliente não concede privilégios admin",
+      "status": "PASS"
+    },
+    {
+      "name": "Cadastros compartilhados restritos a admin",
+      "status": "PASS"
+    },
+    {
+      "name": "Upload no diretório próprio",
+      "status": "PASS"
+    },
+    {
+      "name": "Upload em diretório alheio bloqueado mesmo com política antiga aberta",
+      "status": "PASS"
+    },
+    {
+      "name": "Revisão incremental no servidor",
+      "status": "PASS"
+    },
+    {
+      "name": "Atualização com versão antiga não sobrescreve",
+      "status": "PASS"
+    },
+    {
+      "name": "Exclusão lógica mantém marcador propagável",
+      "status": "PASS"
+    },
+    {
+      "name": "Exclusão física bloqueada ao cliente",
+      "status": "PASS"
+    },
+    {
+      "name": "Usuário autenticado sem associação não lê dados nem fotos",
+      "status": "PASS"
+    },
+    {
+      "name": "Anônimo sem acesso às tabelas",
+      "status": "PASS"
+    },
+    {
+      "name": "Anônimo sem acesso aos comprovantes apesar da política antiga aberta",
+      "status": "PASS"
+    },
+    {
+      "name": "Bucket privado",
+      "status": "PASS"
+    }
+  ]
+}

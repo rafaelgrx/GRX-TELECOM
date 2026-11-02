@@ -1,0 +1,49 @@
+{
+  "environment": "SDK Supabase 2.57.4 real com respostas HTTP simuladas; sem credenciais de produção",
+  "tests": [
+    {
+      "name": "Nuvem não permite criação de admin pelo navegador",
+      "status": "PASS"
+    },
+    {
+      "name": "Login Auth e verificação de membro com SDK real / API simulada",
+      "status": "PASS"
+    },
+    {
+      "name": "Upload falho mantém foto e registro pendentes sem falso envio",
+      "status": "PASS"
+    },
+    {
+      "name": "Fila e comprovante sobrevivem a recarga",
+      "status": "PASS"
+    },
+    {
+      "name": "Retentativa envia foto antes do registro e confirma revisão",
+      "status": "PASS"
+    },
+    {
+      "name": "Edição sincronizada com revisão otimista",
+      "status": "PASS"
+    },
+    {
+      "name": "Conflito preserva pendência local sem sobrescrever servidor",
+      "status": "PASS"
+    },
+    {
+      "name": "Resolver conflito explicitamente pela interface",
+      "status": "PASS"
+    },
+    {
+      "name": "Exclusão lógica enviada e não ressuscita na leitura",
+      "status": "PASS"
+    },
+    {
+      "name": "Recarregar não restaura registro excluído",
+      "status": "PASS"
+    },
+    {
+      "name": "Sem exceções JavaScript nos testes da nuvem simulada",
+      "status": "PASS"
+    }
+  ]
+}

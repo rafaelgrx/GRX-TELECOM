@@ -1,0 +1,15 @@
+{
+  "name": "grx-frota",
+  "version": "2.0.0",
+  "private": true,
+  "description": "GRX Telecom \u2014 app est\u00e1tico com nuvem segura opcional",
+  "scripts": {
+    "serve": "node tests/server.cjs",
+    "test": "node tests/local.cjs && node tests/extra.cjs && node tests/cloud.cjs && node tests/sql.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.64.1",
+    "@electric-sql/pglite": "0.5.14",
+    "axe-core": "4.14.0"
+  }
+}

@@ -1,0 +1,4 @@
+const http=require('http'),fs=require('fs'),path=require('path');const root=path.resolve(__dirname,'..');
+const types={'.html':'text/html; charset=utf-8','.js':'application/javascript','.json':'application/json','.webmanifest':'application/manifest+json','.svg':'image/svg+xml','.png':'image/png'};
+http.createServer((req,res)=>{let pathname;try{pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);}catch(e){res.writeHead(400);return res.end();}
+let file=path.resolve(root,'.'+pathname);if(file!==root&&!file.startsWith(root+path.sep)){res.writeHead(403);return res.end();}if(file===root)file=path.join(root,'index.html');fs.readFile(file,(e,data)=>{if(e){res.writeHead(404);res.end();}else{res.writeHead(200,{'content-type':types[path.extname(file)]||'application/octet-stream','cache-control':'no-store'});res.end(data);}});}).listen(8765,'127.0.0.1',()=>console.log('GRX: http://localhost:8765 (apenas testes locais)'));
