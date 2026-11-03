@@ -1,0 +1,127 @@
+GRX TELECOM — ARQUIVOS REVISADOS
+Revisão: 03/11/2026
+
+O QUE FOI CORRIGIDO
+
+1. Viagem pertence a Manutenção, como item selecionável. Alimentação tem
+   somente Lanche, Almoço e Outros. Viagens antigas (tipo alim / cat viagem)
+   são classificadas como Manutenção durante a leitura, preservando os IDs,
+   datas, valores, autoria, revisão e referências de comprovantes.
+   Abrir o histórico não executa uma migração no banco de produção.
+   Ao editar uma viagem antiga sem veículo, informe o veículo antes de salvar.
+
+2. Corrigido erro de sintaxe na função historical. O index.html recebido
+   também fazia chamadas a funções inexistentes, como Cloud, persist,
+   renderCons, renderCad e bootSync. Essas rotinas foram implementadas nesta
+   revisão; portanto, esta entrega inclui mudanças além de logo/categoria.
+   Teste em uma cópia de homologação antes de substituir a aplicação em uso.
+
+3. Logo extraído diretamente do PDF "Projeto de Fibra Óptica – Catuji | GRX
+   Telecom", página 1, imagem incorporada de 500x500 com máscara alpha original.
+   Não foi usada geração de imagem nem remoção automática para a arte final.
+   O fundo já é transparente no PDF. Os detalhes vermelhos foram preservados.
+   logo-grx-original-pdf.png conserva a imagem completa de 500x500.
+   logo-grx.png recorta somente as margens transparentes para melhor encaixe.
+   Cabeçalho e abertura não têm mais caixa preta. Foi usado fundo bordô para
+   contrastar com as letras claras e os detalhes vermelhos. Os ícones de
+   instalação usam fundo bordô; o favicon ICO mantém transparência.
+   grx-branco-_1_.ico foi gerado desta arte original do PDF.
+
+4. Biblioteca Supabase 2.57.4 incluída em vendor. camera.js e trip-category.js
+   agora são carregados. A regra de categoria está no código principal;
+   não depende de ocultar formulários com MutationObserver.
+
+5. Cache do service worker atualizado, com todos os arquivos necessários.
+   O service worker não intercepta requisições ao Supabase.
+   O modo de equipe precisa de internet para validar/restaurar a conta.
+   Esta versão não promete autenticação offline de equipe.
+
+6. Login de equipe implementado com Supabase Auth e verificação de membro
+   ativo. Cadastros de listas dependem de administrador e políticas RLS.
+   Há controle de revisão no envio dos registros e interface para conflitos.
+   Isto não é uma auditoria de segurança independente nem garantia de ausência
+   de falhas. As políticas reais do seu projeto precisam ser conferidas.
+
+7. Consulta, CSV, impressão/PDF via navegador, compartilhamento, backup JSON
+   e ações dos cadastros foram conectados. A importação JSON na nuvem fica
+   bloqueada para evitar duplicações ou alterações de autoria inadvertidas.
+   A importação local é uma mesclagem: IDs existentes não são sobrescritos.
+   Senhas locais não são exportadas no backup.
+
+COMO PUBLICAR
+
+Faça backup antes de qualquer substituição. Extraia TODO o ZIP e publique os
+arquivos mantendo a estrutura, inclusive a pasta vendor. Não substitua só o
+index.html. Use HTTPS (ou localhost em testes), não file://.
+O config.js conserva a URL e a chave publishable fornecidas. Nunca coloque
+service_role, secret key ou senha do banco nesse arquivo.
+
+Na primeira atualização, pode ser necessário recarregar a página ou usar
+"Atualização disponível — aplicar". Se uma instalação anterior estiver presa
+em cache, remova apenas o service worker/cache do aplicativo, após backup.
+NÃO use "limpar dados do site": isso pode apagar registros e fotos locais.
+O ícone de um aplicativo já instalado pode demorar a atualizar no sistema.
+
+CORREÇÃO DO BANCO EXISTENTE
+
+O pacote NÃO executa SQL automaticamente e não acessou seu banco de produção.
+Para banco existente com as tabelas grx_regs_v2 já configuradas, revise e execute
+corrigir-viagens.sql no SQL Editor, APENAS depois do backup do banco e Storage.
+Esse script adiciona uma normalização para novas gravações e reclassifica os
+registros alim/viagem já existentes, sem apagar registros ou comprovantes.
+O trigger de revisão existente, se instalado, incrementa a revisão das linhas
+migradas. Sincronize os aparelhos antes e depois da migração. Alterações locais
+pendentes podem gerar conflito e devem ser revisadas, não sobrescritas cegamente.
+
+supabase.sql é o esquema completo para instalação/configuração administrativa.
+Ele conserva os impactos do arquivo original: altera permissões e buckets e
+revoga acesso às tabelas legadas grx_regs/grx_config. NÃO o execute apenas para
+corrigir a categoria de um projeto existente. Use o script menor acima.
+Confirme membros ativos, Auth e RLS antes de liberar para a equipe.
+
+ARMAZENAMENTO ANTERIOR E BACKUPS
+
+Para separar contas, a cópia local da nuvem passa a usar chaves por projeto e
+usuário. Dados antigos em grx_regs/grx_cfg não são apagados nem enviados
+automaticamente com outra conta. Se houver dados antigos neste navegador,
+o administrador verá em Cadastros a ação "Exportar backup dos dados antigos".
+Exporte e confira esses registros antes de qualquer limpeza ou migração.
+As fotos locais continuam no IndexedDB original e são recuperadas por fotoId.
+Esta revisão não faz migração automática de tabelas antigas do servidor.
+
+O backup JSON contém os registros e as fotos disponíveis no IndexedDB local.
+Para imagens que existem apenas no Storage, ele contém referências de caminhos,
+não uma cópia completa dos arquivos remotos. Faça backup separado de banco e
+Storage no Supabase para uma recuperação completa.
+
+VERIFICAÇÕES E LIMITES
+
+A sintaxe JavaScript foi verificada com node --check. Testes automatizados em
+Chromium verificaram os fluxos listados abaixo. Os testes de nuvem interceptaram
+as chamadas HTTP com respostas simuladas: NÃO validam as credenciais fornecidas,
+as políticas RLS reais, a entrega de e-mails ou o comportamento real do servidor.
+Não foi executado SQL em um banco real. Câmera física, instalação iOS/Android,
+WhatsApp e diálogo real de impressão precisam de teste nos aparelhos da equipe.
+A biblioteca Supabase distribuída é dependência de terceiro, versão 2.57.4.
+
+TESTES AUTOMATIZADOS APROVADOS
+
+1. Tela inicial abre sem erro de sintaxe
+2. Criação de senha e login local
+3. Nova viagem salva em Manutenção
+4. Alimentação contém somente Lanche, Almoço e Outros
+5. Edição pela consulta preserva a categoria da alimentação
+6. Exportação CSV
+7. Cadastro de veículo
+8. Backup JSON
+9. Botões de câmera carregados
+10. Viagem antiga classificada como Manutenção sem apagar o histórico
+11. Consulta não migra banco ou sobrescreve o registro original
+12. Layout móvel sem rolagem horizontal e sem erros JavaScript
+13. Logout local
+14. Modo nuvem não oferece cadastro de administrador no navegador
+15. Login Supabase e autorização de membro (serviço simulado)
+16. Envio de viagem à API como Manutenção (serviço simulado)
+17. Estado de sincronização sem pendências (serviço simulado)
+18. Logout na nuvem sem erros (serviço simulado)
+19. Service worker instala o pacote completo
