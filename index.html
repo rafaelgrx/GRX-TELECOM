@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>GRX Telecom — Gestão da frota e viagens</title>
-<meta name="theme-color" content="#db2525">
+<meta name="theme-color" content="#a83232">
+<script>(function(){try{var t=localStorage.getItem("grx_theme");if(t!=="dark"&&t!=="light")t=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";document.documentElement.dataset.theme=t;}catch(e){}})();</script>
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="GRX Telecom: controle de frota, despesas e comprovantes.">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -13,8 +14,14 @@
 <style>
 :root{
   --bg:#f3f4f6; --surface:#ffffff; --ink:#1f2937; --muted:#6a7280; --line:#e5e7eb;
-  --primary:#db2525; --on-primary:#ffffff; --field:#f9fafb; --ok:#15803d; --bad:#991b1b;
+  --primary:#a83232; --on-primary:#ffffff; --field:#f9fafb; --ok:#15803d; --bad:#8a3333;
   --sheet:40rem;
+  --ink-2:#4b5563; --primary-btn:var(--primary); --btn-a:#b54242; --btn-b:#932c2c;
+  --brand-a:#571419; --brand-b:#6e1a20; --brand-bg:#6e1a20;
+  --warn-ink:#9a3412; --card:#ffffff; --card-2:#f8fafc; --input-border:#dfe3ea;
+  --file-border:#c9ced8; --chip-border-hover:#c7ccd6;
+  --note-bg:#fffbeb; --note-ink:#78350f; --note-border:#d97706;
+  --pill-ok-bg:#ecfdf5; --pill-ok-ink:#166534; --pill-bad-bg:#fef2f2; --pill-bad-ink:#991b1b; --pill-off-bg:#fff7ed; --pill-off-ink:#9a3412;
 }
 *,*::before,*::after{box-sizing:border-box}
 html{color-scheme:light; scroll-padding-bottom:calc(7.5rem + env(safe-area-inset-bottom,0px)); -webkit-text-size-adjust:100%}
@@ -30,7 +37,7 @@ button{font-family:inherit}
   box-shadow:0 0 26px rgba(15,23,42,.08); padding-bottom:calc(7.2rem + env(safe-area-inset-bottom,0px)); position:relative}
 
 /* ---------- header ---------- */
-.brand{background:#921b24; color:var(--on-primary); padding:22px 20px; display:flex; gap:12px; align-items:flex-start}
+.brand{background:var(--brand-bg); color:var(--on-primary); padding:22px 20px; display:flex; gap:12px; align-items:flex-start}
 .brand .mark{width:56px;height:56px;flex:0 0 56px;border-radius:14px;background:rgba(255,255,255,.16);
   display:grid;place-items:center;font-weight:700;font-size:13px;letter-spacing:.06em}
 .brand .mark{width:88px;height:60px;flex:0 0 88px;background:transparent;border-radius:0;overflow:hidden}
@@ -52,9 +59,9 @@ h2.sec span{font-weight:600;font-size:13px;color:var(--muted);text-transform:non
 form.grid{display:grid;gap:14px;margin:0 20px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 label.f{display:grid;gap:6px;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;min-width:0}
-input,select,textarea{font-family:inherit;font-size:14.5px;font-weight:600;color:#111827;background:var(--field);
+input,select,textarea{font-family:inherit;font-size:14.5px;font-weight:600;color:var(--ink);background:var(--field);
   border:1px solid var(--line);border-radius:8px;padding:12px;width:100%;min-width:0}
-input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(219,37,37,.13)}
+input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(168,50,50,.13)}
 textarea{resize:vertical}
 select{appearance:none;background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236a7280' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 10px center;background-size:16px;padding-right:34px}
@@ -71,26 +78,26 @@ legend{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{border:1px solid var(--line);background:var(--field);color:var(--muted);border-radius:8px;
   padding:9px 12px;font-size:11.5px;font-weight:600;cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--primary);border-color:var(--primary);color:#fff}
+.chip[aria-pressed="true"]{background:var(--primary-btn);border-color:var(--primary-btn);color:#fff}
 
 /* tabs */
 .tabs{display:flex;gap:8px;overflow-x:auto;padding:16px 20px 0;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:0 0 auto;border:1px solid var(--line);background:var(--field);color:var(--muted);border-radius:8px;
   padding:9px 15px;font-size:11.5px;font-weight:700;text-transform:uppercase;cursor:pointer}
-.tab[aria-pressed="true"]{background:var(--primary);border-color:var(--primary);color:#fff}
+.tab[aria-pressed="true"]{background:var(--primary-btn);border-color:var(--primary-btn);color:#fff}
 
 /* photo */
 .photo-prev{display:flex;align-items:center;gap:12px}
-.photo-prev img{height:76px;border:1px solid var(--line);border-radius:8px;object-fit:cover;cursor:zoom-in;background:#fff}
-input[type=file]{padding:9px;font-size:12px;background:#fff}
-input[type=file]::file-selector-button{font-family:inherit;border:0;background:var(--primary);color:#fff;
+.photo-prev img{height:76px;border:1px solid var(--line);border-radius:8px;object-fit:cover;cursor:zoom-in;background:var(--card)}
+input[type=file]{padding:9px;font-size:12px;background:var(--card)}
+input[type=file]::file-selector-button{font-family:inherit;border:0;background:var(--primary-btn);color:#fff;
   font-weight:700;font-size:11px;text-transform:uppercase;border-radius:6px;padding:8px 11px;margin-right:10px;cursor:pointer}
 .linkbtn{background:none;border:0;padding:0;color:var(--primary);font-size:11.5px;font-weight:700;text-transform:uppercase;cursor:pointer}
 
 /* records */
 .list{border:1px solid var(--line);border-radius:0 0 10px 10px;overflow:hidden;margin:0 20px}
-.list-head{display:flex;justify-content:space-between;background:var(--primary);color:#fff;
+.list-head{display:flex;justify-content:space-between;background:var(--primary-btn);color:#fff;
   font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:10px 14px;
   border-radius:10px 10px 0 0;margin:0 20px}
 .rec{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;padding:12px 14px;border-bottom:1px solid var(--line)}
@@ -148,7 +155,7 @@ nav.tabbar .in{max-width:var(--sheet);margin:0 auto;display:flex}
 .lb{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(17,24,39,.85);padding:20px}
 .lb img{max-height:100%;max-width:100%;border-radius:10px;object-fit:contain}
 .lb button{position:absolute;top:14px;right:14px;width:44px;height:44px;border-radius:999px;border:0;
-  background:#fff;color:#111827;font-size:22px;line-height:1;cursor:pointer}
+  background:var(--card);color:var(--ink);font-size:22px;line-height:1;cursor:pointer}
 
 /* login */
 .login{max-width:var(--sheet);margin:0 auto;background:var(--surface);min-height:100dvh;box-shadow:0 0 26px rgba(15,23,42,.08)}
@@ -159,12 +166,59 @@ nav.tabbar .in{max-width:var(--sheet);margin:0 auto;display:flex}
 details.first{margin:0 20px;border:1px dashed var(--line);border-radius:10px;padding:12px;background:var(--field)}
 details.first summary{font-size:11.5px;font-weight:700;text-transform:uppercase;color:var(--primary);cursor:pointer}
 details.first .grid{margin:12px 0 0;display:grid;gap:10px}
-.splash{min-height:100dvh;display:grid;place-items:center;background:#921b24;color:#fff}
+.splash{min-height:100dvh;display:grid;place-items:center;background:var(--brand-bg);color:#fff}
 .splash .b{text-align:center}
 .splash .b b{font-size:32px;letter-spacing:.08em;display:block}
 .splash .b span{font-size:13px;font-weight:600;opacity:.85}
 
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- refinamento visual ---------- */
+:root{--radius:12px;--radius-sm:10px;--shadow-1:0 1px 2px rgba(15,23,42,.05),0 3px 12px rgba(15,23,42,.07);--shadow-2:0 10px 30px rgba(15,23,42,.16)}
+html[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0f1216; --surface:#171c23; --ink:#e8eaf0; --ink-2:#b6bdc9; --muted:#98a1b0; --line:#2b323c;
+  --primary:#e57774; --primary-btn:#b8453f; --btn-a:#bf4f4a; --btn-b:#a03832;
+  --field:#1f262e; --card:#1f252d; --card-2:#1a2028; --input-border:#3a4250; --file-border:#4a5361; --chip-border-hover:#556070;
+  --ok:#4fc57e; --bad:#e58a8a; --warn-ink:#e8b57a;
+  --note-bg:#2a2318; --note-ink:#f0d9a8; --note-border:#b08a3e;
+  --pill-ok-bg:#1d3328; --pill-ok-ink:#7ee2a4; --pill-bad-bg:#3a2222; --pill-bad-ink:#f0a5a5; --pill-off-bg:#33291c; --pill-off-ink:#e8b57a;
+  --shadow-1:0 1px 2px rgba(0,0,0,.4),0 3px 12px rgba(0,0,0,.4); --shadow-2:0 10px 30px rgba(0,0,0,.55);
+}
+html[data-theme="dark"] .brand,html[data-theme="dark"] .splash{background:var(--brand-bg)}
+input,select,textarea{border-radius:var(--radius-sm);border-color:var(--input-border);box-shadow:0 1px 2px rgba(15,23,42,.04);transition:border-color .15s ease,box-shadow .15s ease;background:var(--card)}
+input:focus-visible,select:focus-visible,textarea:focus-visible{box-shadow:0 0 0 4px rgba(168,50,50,.12)}
+select{background-color:var(--card)}
+.btn{border-radius:var(--radius);background:linear-gradient(180deg,var(--btn-a),var(--btn-b));box-shadow:0 2px 6px rgba(168,50,50,.26),inset 0 1px 0 rgba(255,255,255,.18);transition:transform .12s ease,box-shadow .15s ease,filter .15s ease}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:translateY(1px)}
+.btn.line{background:var(--card);color:var(--primary);box-shadow:0 1px 3px rgba(15,23,42,.10)}
+.chip,.tab{border-radius:999px;padding:10px 16px;background:var(--card);font-weight:700;transition:border-color .15s ease,box-shadow .15s ease,color .15s ease,background .15s ease}
+.chip[aria-pressed="true"],.tab[aria-pressed="true"]{box-shadow:0 2px 8px rgba(168,50,50,.30)}
+.chip:hover,.tab:hover{border-color:var(--chip-border-hover)}
+.tab{padding:11px 18px}
+.list,details.first{border-radius:var(--radius)}
+.list{box-shadow:var(--shadow-1);margin-top:8px}
+.list-head{border-radius:var(--radius) var(--radius) 0 0;padding:11px 14px}
+.rec{transition:background .15s ease}
+.rec:hover{background:var(--field)}
+.rec img.thumb{border-radius:8px}
+.act{border-radius:var(--radius-sm);background:var(--card);box-shadow:var(--shadow-1);color:var(--ink);transition:transform .12s ease,box-shadow .15s ease}
+.act:hover{box-shadow:var(--shadow-2)}
+.act:active{transform:translateY(1px)}
+.act svg{stroke:var(--primary)}
+.chipsum span{border-radius:999px;background:var(--card);box-shadow:0 1px 3px rgba(15,23,42,.06)}
+.pill{background:var(--card);box-shadow:0 1px 3px rgba(15,23,42,.06)}
+.toast p{border-radius:12px;border-left:4px solid var(--ok);box-shadow:var(--shadow-2)}
+.login{box-shadow:0 24px 60px rgba(15,23,42,.12)}
+details.first{background:var(--card);border-style:solid;box-shadow:var(--shadow-1)}
+nav.tabbar{box-shadow:0 -6px 24px rgba(15,23,42,.07)}
+.statusbar{background:var(--card)}
+input[type=file]{border-radius:var(--radius-sm);border-style:dashed;border-color:var(--file-border);padding:14px 9px}
+input[type=file]::file-selector-button{border-radius:999px}
+h2.sec{border-left-width:5px;border-radius:3px}
+.empty{padding:26px 16px}
+.ghost{transition:background .15s ease}
 
 @media print{
   *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
@@ -174,25 +228,25 @@ details.first .grid{margin:12px 0 0;display:grid;gap:10px}
   .brand{background:var(--primary) !important;color:#fff !important}
   h2.sec{color:#111 !important;border-left-color:#111 !important}
   .rec{break-inside:avoid;page-break-inside:avoid}
-  .rec:nth-child(even){background:#f4f4f5 !important}
+  .rec:nth-child(even){background:var(--field) !important}
   .sheet{box-shadow:none;max-width:none;padding-bottom:0}
   .print-only{display:block !important}
-  .list{border-color:#bbb}
+  .list{border-color:var(--muted)}
 }
 .print-only{display:none;padding:6px 20px 0}
 .print-only p{margin:0;font-size:14px;font-weight:700}
-.print-only small{font-size:11px;font-weight:600;color:#555}
+.print-only small{font-size:11px;font-weight:600;color:var(--ink-2)}
 @media (max-width:380px){ .brand h1{font-size:16px} .row2{grid-template-columns:1fr} }
 
 /* GRX 2.0 — responsive, keyboard accessible, print isolated */
 :root{--sheet:76rem}
-body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#edf0f4}
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg)}
 button,input,select,textarea{-webkit-tap-highlight-color:transparent}
 input,select,textarea{font-size:16px;min-height:46px}
 button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #234c98;outline-offset:3px}
 button{min-height:44px;touch-action:manipulation}
 button:disabled{opacity:.5;cursor:not-allowed}
-.brand{background:linear-gradient(120deg,#70171e,#921b24);align-items:center;padding:24px 28px}
+.brand{background:linear-gradient(120deg,var(--brand-a),var(--brand-b));align-items:center;padding:24px 28px}
 .brand .who{color:#fff;max-width:65vw;overflow-wrap:anywhere}
 .brand p{color:#fff}
 .sheet{border-radius:0 0 18px 18px}
@@ -200,21 +254,21 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .login .brand{padding:28px}
 .login .body{padding:24px 28px}
 .login details{margin:0 28px}
-.statusbar{display:flex;justify-content:space-between;gap:12px;padding:12px 24px;background:#f8fafc;border-bottom:1px solid var(--line);font-size:13px;flex-wrap:wrap}
+.statusbar{display:flex;justify-content:space-between;gap:12px;padding:12px 24px;background:var(--card-2);border-bottom:1px solid var(--line);font-size:13px;flex-wrap:wrap}
 .statusbar b{font-weight:650}
-#statusNetwork{color:#166534}
-body.offline #statusNetwork{color:#9a3412}
-.security-note{font-size:12px;line-height:1.6;border-left:3px solid #d97706;background:#fffbeb;padding:12px 14px;margin:16px 20px;color:#78350f}
+#statusNetwork{color:var(--ok)}
+body.offline #statusNetwork{color:var(--warn-ink)}
+.security-note{font-size:12px;line-height:1.6;border-left:3px solid var(--note-border);background:var(--note-bg);padding:12px 14px;margin:16px 20px;color:var(--note-ink)}
 .rec .t,.rec .m,.rec .x{overflow-wrap:anywhere}
 .rec .t{text-transform:none}
-.rec .m,.rec .x{color:#4b5563;line-height:1.55}
-.rec .v{color:#111827;font-variant-numeric:tabular-nums}
+.rec .m,.rec .x{color:var(--ink-2);line-height:1.55}
+.rec .v{color:var(--ink);font-variant-numeric:tabular-nums}
 .rec .del{font-size:12px;padding:6px 10px}
 .rec img.thumb{width:70px;height:70px}
-.rec .pending{font-size:11px;color:#92400e;display:block;margin-top:5px}
-.pill.on{background:#ecfdf5;color:#166534;border-color:#bbf7d0}
-.pill.bad{background:#fef2f2;color:#991b1b}
-.pill.off{background:#fff7ed;color:#9a3412}
+.rec .pending{font-size:11px;color:var(--warn-ink);display:block;margin-top:5px}
+.pill.on{background:var(--pill-ok-bg);color:var(--pill-ok-ink);border-color:var(--pill-ok-bg)}
+.pill.bad{background:var(--pill-bad-bg);color:var(--pill-bad-ink)}
+.pill.off{background:var(--pill-off-bg);color:var(--pill-off-ink)}
 .hint{line-height:1.6}
 #cResumo{white-space:normal;text-align:right}
 #cancelEdit{margin:10px 20px;width:calc(100% - 40px)}
@@ -229,7 +283,7 @@ body.offline #statusNetwork{color:#9a3412}
  nav.tabbar{position:sticky;top:0;bottom:auto;border-top:0;border-bottom:1px solid var(--line);order:-1;grid-column:1/-1;grid-row:2;z-index:25}
  nav.tabbar .in{padding:0 20px;gap:8px}
  .navb{flex-direction:row;gap:10px;padding:18px 14px;border-top:0;border-bottom:3px solid transparent;font-size:12px}
- .navb[aria-current="page"]{border-bottom-color:var(--primary);border-top:0;background:#fff1f2}
+ .navb[aria-current="page"]{border-bottom-color:var(--primary);border-top:0;background:var(--pill-bad-bg)}
  #app{display:grid;grid-template-columns:1fr;align-content:start}
  #app>.brand{grid-row:1}#app>.statusbar{grid-row:3}
  #app>section{grid-row:4;padding:24px 8px 30px}
@@ -258,7 +312,7 @@ body.offline #statusNetwork{color:#9a3412}
 }
 
 
-.navb[aria-current="page"]{color:#b91c25}
+.navb[aria-current="page"]{color:#8f2a2e}
 </style>
 </head>
 <body>
@@ -320,7 +374,8 @@ body.offline #statusNetwork{color:#9a3412}
     <button class="ghost" id="logoffTop" type="button">Sair</button>
   </header>
 
-  <div class="statusbar no-print"><b id="statusMode">Modo local</b><span id="statusNetwork" role="status">Online</span><button id="updateBtn" class="linkbtn" type="button" hidden>Atualização disponível — aplicar</button></div>
+  <div class="statusbar no-print"><b id="statusMode">Modo local</b><span id="statusNetwork" role="status">Online</span><button id="updateBtn" class="linkbtn" type="button" hidden>Atualização disponível — aplicar</button>
+<button id="themeBtn" class="linkbtn no-print" type="button">🌙 Modo escuro</button></div>
   <button id="cancelEdit" class="btn line no-print" type="button" hidden>Cancelar edição</button>
   <!-- MANUTENÇÃO -->
   <section id="view-manut">
@@ -363,7 +418,7 @@ body.offline #statusNetwork{color:#9a3412}
       <label class="f">Observação
         <textarea id="mObs" maxlength="4000" rows="2" placeholder="Opcional"></textarea>
       </label>
-      <button class="btn" type="submit" id="mSave">Salvar manutenção</button>
+      <button class="btn" type="submit" id="mSave">Salvar registro</button>
     </form>
     <h2 class="sec">Histórico <span id="mTotal">R$ 0,00</span></h2>
     <div class="list-head"><span>Registro</span><span>Valor</span></div>
@@ -428,7 +483,7 @@ body.offline #statusNetwork{color:#9a3412}
         <label class="f">Tipo
           <select id="cTipo">
             <option value="">Tudo</option>
-            <option value="manut">Manutenção</option>
+            <option value="manut">Veículos</option>
             <option value="alim">Alimentação</option>
           </select>
         </label>
@@ -547,7 +602,7 @@ body.offline #statusNetwork{color:#9a3412}
     <div class="in">
       <button class="navb" data-nav="manut" aria-current="page">
         <svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5 5l-9.4 9.4a2.1 2.1 0 0 1-3-3z"/></svg>
-        Manutenção
+        Veículos
       </button>
       <button class="navb" data-nav="alim">
         <svg viewBox="0 0 24 24"><path d="M4 3v7a3 3 0 0 0 6 0V3M7 3v18"/><path d="M17 3c-1.7 2-2.5 3.7-2.5 5.5S15.3 12 17 12s2.5-1.7 2.5-3.5S18.7 5 17 3zM17 12v9"/></svg>
@@ -576,6 +631,7 @@ body.offline #statusNetwork{color:#9a3412}
 </dialog>
 <script src="./config.js"></script>
 <script src="./vendor/supabase-2.57.4.js"></script>
+<script>if(!window.supabase)document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js"><\/script>');</script>
 <script>
 (function(){
 "use strict";
@@ -701,7 +757,7 @@ function normalizeReg(v){
   if(v.tipo!=="manut"&&v.tipo!=="alim")return null;
   if(!Number.isFinite(Number(v.valor))||Number(v.valor)<0||Number(v.valor)>999999999.99)return null;
   if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(v.quando||"")||!Number.isFinite(new Date(v.quando).getTime()))return null;
-  /* Compatibilidade: viagens antigas passam a Manutenção sem perder ID/foto/autoria.
+  /* Compatibilidade: viagens antigas passam a Veículos sem perder ID/foto/autoria.
      Isto classifica a cópia local; não executa migração no servidor. */
   if(v.tipo==="alim"&&v.cat==="viagem"){
     v=Object.assign({},v,{tipo:"manut",cat:undefined,itens:uniq((Array.isArray(v.itens)?v.itens:[]).concat(["Viagem"]),[])});
@@ -916,9 +972,9 @@ function renderManut(){
   var rows=manutRows();
   $("mTotal").textContent=brl(sumValor(rows));
   $("mList").innerHTML=rows.length?rows.map(function(r){
-    return recHtml(r,{title:(r.itens&&r.itens.length)?r.itens.join(", "):"Manutenção",
+    return recHtml(r,{title:(r.itens&&r.itens.length)?r.itens.join(", "):"Veículos",
       meta:[fdt(r.quando),r.veiculo||"",r.km?r.km+" km":"",r.cidade,r.pagamento,who(r.usuario)],extra:r.obs});
-  }).join(""):'<p class="empty">Nenhuma manutenção lançada.</p>';
+  }).join(""):'<p class="empty">Nenhum lançamento em Veículos.</p>';
   renderChips();
 }
 
@@ -956,7 +1012,7 @@ function renderAlim(){
 
 function describeFilters(f){
   return [f.veiculo&&"Veículo: "+f.veiculo,f.cidade&&"Cidade: "+f.cidade,f.usuario&&"Usuário: "+f.usuario,
-    f.pagamento&&"Pagamento: "+f.pagamento,f.tipo==="manut"?"Tipo: Manutenção":f.tipo==="alim"?"Tipo: Alimentação":"",
+    f.pagamento&&"Pagamento: "+f.pagamento,f.tipo==="manut"?"Tipo: Veículos":f.tipo==="alim"?"Tipo: Alimentação":"",
     f.de&&f.ate?"Período: "+formatDay(f.de)+" a "+formatDay(f.ate):f.de?"A partir de "+formatDay(f.de):f.ate?"Até "+formatDay(f.ate):""].filter(Boolean).join(" · ");
 }
 function filterRegs(rows,f){
@@ -1080,7 +1136,7 @@ function init(){
     ev.preventDefault();
     if(S.saving||SYNC.enviando)return notify("Aguarde a operação atual terminar.");
     if(S.photoLoading)return notify("Aguarde o processamento do comprovante.");
-    if(!CATS.some(function(c){return c.id===S.sub;}))return notify("Viagem pertence a Manutenção. Selecione uma categoria de alimentação.");
+    if(!CATS.some(function(c){return c.id===S.sub;}))return notify("Viagem pertence a Veículos. Selecione uma categoria de alimentação.");
     var d=S.alim;
     d.quando=$("aQuando").value; d.cidade=$("aCidade").value;
     d.pagamento=$("aPagamento").value; d.valor=$("aValor").value; d.obs=$("aObs").value;
@@ -1187,8 +1243,9 @@ var Cloud={
  configured:function(){return !!(GRX_BACKEND.url&&GRX_BACKEND.anonKey);},
  on:function(){return !!(client&&member&&S.session);},
  getClient:function(){
-  if(!client){if(!window.supabase)throw new Error("Biblioteca Supabase ausente. Publique também a pasta vendor.");
-   client=window.supabase.createClient(GRX_BACKEND.url,GRX_BACKEND.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});}
+  if(client)return client;
+  if(!window.supabase)throw new Error("Não foi possível conectar à nuvem agora. Verifique sua internet e tente de novo. Se o erro continuar, o administrador precisa publicar o site completo (com a pasta vendor). (Código: LIB)");
+  client=window.supabase.createClient(GRX_BACKEND.url,GRX_BACKEND.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
   return client;
  },
  authorize:async function(user){
@@ -1317,9 +1374,9 @@ function renderCons(){
  opts($('cVeiculo'),historical('veiculos'),'Todos os veículos');opts($('cCidade'),historical('cidades'),'Todas as cidades');opts($('cPagamento'),historical('pagamentos'),'Todos os pagamentos');opts($('cUsuario'),historical('users'),'Todos os usuários');
  var rows=filterRegs(activeRegs(),S.filters).sort(function(a,b){return b.quando.localeCompare(a.quando);});
  $('cResumo').textContent=rows.length+' lançamento(s) · '+brl(sumValor(rows));$('printFilter').textContent=describeFilters(S.filters);
- $('cGroups').textContent='Manutenção: '+brl(sumValor(rows.filter(function(r){return r.tipo==='manut';})))+' · Alimentação: '+brl(sumValor(rows.filter(function(r){return r.tipo==='alim';})));
+ $('cGroups').textContent='Veículos: '+brl(sumValor(rows.filter(function(r){return r.tipo==='manut';})))+' · Alimentação: '+brl(sumValor(rows.filter(function(r){return r.tipo==='alim';})));
  $('cLimpar').hidden=!Object.values(S.filters).some(Boolean);
- $('cList').innerHTML=rows.length?rows.map(function(r){return recHtml(r,{title:r.tipo==='manut'?(r.itens.join(', ')||'Manutenção'):catLabel(r.cat),meta:[fdt(r.quando),r.veiculo,r.cidade,r.pagamento,who(r.usuario)],extra:r.obs});}).join(''):'<p class="empty">Nenhum lançamento encontrado.</p>';
+ $('cList').innerHTML=rows.length?rows.map(function(r){return recHtml(r,{title:r.tipo==='manut'?(r.itens.join(', ')||'Veículos'):catLabel(r.cat),meta:[fdt(r.quando),r.veiculo,r.cidade,r.pagamento,who(r.usuario)],extra:r.obs});}).join(''):'<p class="empty">Nenhum lançamento encontrado.</p>';
 }
 function renderCad(){
  [['veiculos','pVeiculos'],['cidades','pCidades'],['pagamentos','pPagamentos']].forEach(function(pair){
@@ -1335,6 +1392,9 @@ function reportText(){var rows=filterRegs(activeRegs(),S.filters);return 'GRX Te
 function bindExtra(){
  document.querySelectorAll('[data-nav]').forEach(function(b){b.addEventListener('click',function(){if(S.editId)return notify('Salve ou cancele a edição antes de mudar de seção.');setView(b.dataset.nav);});});
  $('mQuando').value=S.manut.quando;$('aQuando').value=S.alim.quando;
+ function applyThemeLabel(){var b=$("themeBtn");if(b)b.textContent=document.documentElement.dataset.theme==="dark"?"☀️ Modo claro":"🌙 Modo escuro";var m=document.querySelector('meta[name="theme-color"]');if(m)m.content=document.documentElement.dataset.theme==="dark"?"#0f1216":"#a83232";}
+ applyThemeLabel();
+ $("themeBtn").addEventListener("click",function(){var t=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=t;try{localStorage.setItem("grx_theme",t);}catch(e){}applyThemeLabel();});
  $('legacyExport').onclick=async function(){try{assertSession();if(!isAdmin())throw new Error('Somente administrador pode recuperar este backup.');var regs=lsGet(LEGACY_REGS_KEY)||[],photos={};for(var r of regs){if(r.fotoId){var photo=await getFoto(r.fotoId);if(photo)photos[r.fotoId]=photo;}}downloadData('grx-backup-dados-antigos.json',JSON.stringify({version:3,regs:regs,fotos:photos},null,2),'application/json');}catch(e){notify(e.message);}};
  $('syncBtn').onclick=bootSync;$('pushBtn').onclick=function(){if(!window.confirm('Reenviar seus registros locais? Registros com conflito não serão sobrescritos.'))return;S.regs.forEach(function(r){if(canChange(r))r.pend=true;});saveRegs(S.regs);bootSync();};
  window.addEventListener('online',function(){refreshCloudPanel();bootSync();});window.addEventListener('offline',refreshCloudPanel);
@@ -1356,7 +1416,7 @@ function bindExtra(){
  };
  document.querySelectorAll('[data-act]').forEach(function(b){b.onclick=async function(){
   var act=b.dataset.act;if(act==='pdf'){window.print();return;}if(act==='whats'){var text=reportText();if(navigator.share){try{await navigator.share({title:'GRX Telecom',text:text});}catch(e){if(e.name!=='AbortError')notify('Não foi possível compartilhar.');}}else window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank','noopener');return;}
-  var cols=['Data','Tipo','Categoria / itens','Veículo','Cidade','Pagamento','Valor','Observação','Usuário'];var rows=filterRegs(activeRegs(),S.filters).map(function(r){return [r.quando,r.tipo==='manut'?'Manutenção':'Alimentação',r.tipo==='manut'?r.itens.join(', '):catLabel(r.cat),r.veiculo||'',r.cidade,r.pagamento,r.valor.toFixed(2).replace('.',','),r.obs,r.usuario];});
+  var cols=['Data','Tipo','Categoria / itens','Veículo','Cidade','Pagamento','Valor','Observação','Usuário'];var rows=filterRegs(activeRegs(),S.filters).map(function(r){return [r.quando,r.tipo==='manut'?'Veículos':'Alimentação',r.tipo==='manut'?r.itens.join(', '):catLabel(r.cat),r.veiculo||'',r.cidade,r.pagamento,r.valor.toFixed(2).replace('.',','),r.obs,r.usuario];});
   function cell(v){var s=String(v==null?'':v);if(/^[\s]*[=+@-]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"';}
   downloadData('grx-relatorio.csv','\uFEFF'+[cols].concat(rows).map(function(row){return row.map(cell).join(';');}).join('\r\n'),'text/csv;charset=utf-8');
  };});
