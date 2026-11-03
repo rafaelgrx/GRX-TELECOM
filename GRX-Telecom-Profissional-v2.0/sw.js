@@ -1,5 +1,5 @@
 /* Cache only application shell. NEVER cache Auth/REST/Storage requests. */
-const CACHE='grx-shell-v2-295f29e812';
+const CACHE='grx-shell-v2-cloud-20261103';
 const FILES=['./','./index.html','./config.js','./vendor/supabase-2.57.4.js','./manifest.webmanifest','./icon.svg','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES))));
 self.addEventListener('message',e=>{if(e.data?.type==='ACTIVATE')self.skipWaiting();});
