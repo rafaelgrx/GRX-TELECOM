@@ -1,6 +1,18 @@
 GRX TELECOM — ARQUIVOS REVISADOS
 Revisão: 03/11/2026
 
+RENOMEAÇÃO — A ABA "MANUTENÇÃO" AGORA SE CHAMA "VEÍCULOS"
+Somente os textos na tela mudaram (aba, filtros, totais, CSV e PDF).
+Nenhum dado foi migrado: os registros continuam guardados com o código
+interno "manut", então registros antigos e novos aparecem juntos,
+inclusive os que foram salvos com a aba com o nome anterior.
+No resultado da Consulta, o título de cada registro mostra os itens
+selecionados em "O que foi feito"; a Alimentação continua como estava.
+Erro do print "Biblioteca Supabase ausente": a mensagem agora explica
+causas comuns (internet) e o site tenta carregar a biblioteca de um
+segundo endereço (CDN) se a pasta vendor não responder.
+
+
 O QUE FOI CORRIGIDO
 
 1. Viagem pertence a Manutenção, como item selecionável. Alimentação tem
