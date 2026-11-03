@@ -1,9 +1,8 @@
-/* GRX 2.0 — preencha somente chave pública/publishable ou anon. NUNCA service_role.
-   Vazio = modo local. Configuração parcial falha fechada e NÃO ativa login local na nuvem.
-   Primeiro aplique supabase.sql e cadastre os membros conforme LEIA-ME.html. */
+/* GRX 2.0 — chave publishable é pública; NUNCA use service_role.
+   Configure o projeto Supabase e execute supabase.sql antes de usar a nuvem. */
 window.GRX_CONFIG = {
-  url: "",
-  anonKey: "",
+  url: "https://cciioxipmmoajgdezikh.supabase.co",
+  anonKey: "sb_publishable_BqRiSTGH9DSC7pqhdQMLGg_-YpnGc6W",
   bucket: "grx-comprovantes-v2",
   table: "grx_regs_v2",
   cfgTable: "grx_config_v2",
