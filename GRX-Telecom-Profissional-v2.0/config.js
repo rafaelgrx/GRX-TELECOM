@@ -8,5 +8,5 @@ window.GRX_CONFIG = {
   cfgTable: "grx_config_v2",
   cfgRow: "listas",
   fotoMax: 1600,
-  fotoQuality: 0.75
+  fotoQuality: 0.4
 };
