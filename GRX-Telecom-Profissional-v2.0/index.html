@@ -586,9 +586,9 @@ var CFG_KEY="grx_cfg", REGS_KEY="grx_regs", SESSION_KEY="grx_logged_user";
 var ITENS = ["Combustível","Troca de óleo","Filtro de óleo","Filtro de ar","Filtro de combustível",
 "Filtro de ar-condicionado","Pastilhas de freio","Discos de freio","Fluido de freio","Pneus",
 "Alinhamento e balanceamento","Bateria","Correia dentada","Velas","Água do radiador","Lâmpadas",
-"Amortecedores","Revisão geral","Lavagem","Outro"];
+"Amortecedores","Revisão geral","Lavagem","Viagem","Outro"];
 
-var CATS = [{id:"lanche",label:"Lanche"},{id:"almoco",label:"Almoço"},{id:"viagem",label:"Viagem"},{id:"outros",label:"Outros"}];
+var CATS = [{id:"lanche",label:"Lanche"},{id:"almoco",label:"Almoço"},{id:"outros",label:"Outros"}];
 
 var DEF_CIDADES = ["Caraí (matriz)","Novo Cruzeiro","Lufa/Queixada","Marambainha","Padre Paraíso","Teófilo Otoni"];
 var DEF_PAGS = ["Cartão Cora (vence dia 5)","Cartão BMG (vence dia 15)","Pix","Cartão pessoal"];
@@ -869,7 +869,7 @@ function renderAll(){ renderManut(); renderAlim(); renderCons(); renderCad(); re
 function activeRegs(){return S.regs.filter(function(r){return !r.deleted;});}
 function canChange(r){return !!S.session&&(!Cloud.configured()||r.usuario===S.session||isAdmin());}
 function isAdmin(){return S.cfg.users.some(function(u){return u.email===S.session&&u.admin;});}
-function historical(key){var field={veiculos:"veiculo",cidades:"cidade",pagamentos:"pagamento",users:"usuario"}[key];return uniq((key==="users"?S.cfg.users.map(function(u){return u.email;}):S.cfg[key]).concat(activeRegs().map(function(r){return r[field]||"";})),[]);}
+function historical(key){var field={veiculos:"veiculo",cidades:"cidade",pagamentos:"pagamento",users:"usuario"}[key];return uniq((key==="users"?S.cfg.users.map(function(u){return u.email;}):S.cfg[key]).concat(activeRegs().map(function(r){return r[field]||";})),[]);}
 
 function selectedVehicle(){ return $("mVeiculo").value||""; }
 
@@ -960,289 +960,85 @@ function filterRegs(rows,f){
     if(f.de&&dia&&dia<f.de)return false;
     if(f.ate&&dia&&dia>f.ate)return false;
     return true;
-  }).sort(function(a,b){return (b.quando||"").localeCompare(a.quando||"")||b.criado-a.criado;});
-}
-function groupByPagamento(rows){
-  var m=Object.create(null); rows.forEach(function(r){var k=r.pagamento||"Sem pagamento";m[k]=(m[k]||0)+(Number(r.valor)||0);});
-  return Object.keys(m).map(function(k){return {name:k,total:m[k]};}).sort(function(a,b){return b.total-a.total;});
-}
-
-function appliedFilters(){
-  var f=S.filters;
-  return {
-    veiculo: historical("veiculos").indexOf(f.veiculo)>=0?f.veiculo:"",
-    cidade: historical("cidades").indexOf(f.cidade)>=0?f.cidade:"",
-    usuario: historical("users").indexOf(f.usuario)>=0?f.usuario:"",
-    pagamento: historical("pagamentos").indexOf(f.pagamento)>=0?f.pagamento:"",
-    tipo: f.tipo,
-    de: /^\d{4}-\d{2}-\d{2}$/.test(f.de||"")?f.de:"",
-    ate: /^\d{4}-\d{2}-\d{2}$/.test(f.ate||"")?f.ate:""
-  };
-}
-
-function renderCons(){
-  opts($("cVeiculo"),historical("veiculos"),"Todos os veículos");
-  opts($("cCidade"),historical("cidades"),"Todas as cidades");
-  opts($("cUsuario"),historical("users"),"Todos os usuários");
-  opts($("cPagamento"),historical("pagamentos"),"Todos os meios");
-  $("cVeiculo").value=S.filters.veiculo; $("cCidade").value=S.filters.cidade;
-  $("cUsuario").value=S.filters.usuario; $("cPagamento").value=S.filters.pagamento;
-  $("cTipo").value=S.filters.tipo; $("cDe").value=S.filters.de||""; $("cAte").value=S.filters.ate||"";
-
-  var ap=appliedFilters(), rows=filterRegs(activeRegs(),ap), desc=describeFilters(ap);
-  if(ap.de&&ap.ate&&ap.de>ap.ate){$("cResumo").textContent="Período inválido: De deve ser anterior a Até";$("cList").innerHTML='<p class="empty">Ajuste o período.</p>';$("cGroups").innerHTML="";$("cLimpar").hidden=false;return;}
-  $("cResumo").textContent=rows.length+(rows.length===1?" lançamento":" lançamentos")+", "+brl(sumValor(rows));
-  $("cLimpar").hidden=!desc;
-  $("printFilter").textContent=desc;
-  var groups=ap.pagamento?[]:groupByPagamento(rows);
-  $("cGroups").innerHTML=groups.map(function(g){
-    return '<span>'+esc(g.name)+': <b>'+esc(brl(g.total))+'</b></span>';}).join("");
-  $("cList").innerHTML=rows.length?rows.map(function(r){
-    var isM=r.tipo==="manut";
-    return recHtml(r,{
-      title:isM?(r.veiculo||"Veículo"):("Alimentação, "+catLabel(r.cat).toLowerCase()),
-      meta:[fdt(r.quando),r.cidade||"Sem cidade",who(r.usuario)],
-      extra:isM?[(r.itens||[]).join(", "),r.obs,r.pagamento].filter(Boolean).join(". ")
-              :[r.obs,r.pagamento].filter(Boolean).join(". ")
-    });
-  }).join(""):'<p class="empty">Nenhum lançamento com esses filtros.</p>';
-}
-
-function renderCad(){
-  paintPills("pVeiculos",S.cfg.veiculos,"veiculos");
-  paintPills("pCidades",S.cfg.cidades,"cidades");
-  paintPills("pPagamentos",S.cfg.pagamentos,"pagamentos");
-  var me=S.cfg.users.filter(function(u){return u.email===S.session;})[0];
-  $("pUsers").innerHTML=S.cfg.users.map(function(u,i){
-    return '<span class="pill">'+esc(u.email)+(u.admin?' <span class="adm">Admin</span>':'')+
-      '<button type="button" data-userdel="'+i+'" aria-label="Remover '+esc(u.email)+'">×</button></span>';
-  }).join("");
-  $("userAdmin").hidden=Cloud.configured()||!me||!me.admin;
-}
-function paintPills(id,items,key){
-  var box=$(id);
-  box.innerHTML=items.length?items.map(function(it,i){
-    return '<span class="pill">'+esc(it)+'<button type="button" data-delitem="'+key+'" data-i="'+i+'" aria-label="Remover '+esc(it)+'">×</button></span>';
-  }).join(""):'<p class="hint" style="margin:0">Nenhum item.</p>';
-}
-
-/* ================= ações de dados ================= */
-function commitCfg(next,msg){
-  if(Cloud.configured()&&isAdmin())next._pendingLists=true;
-  if(!saveCfg(next)){notify("Não foi possível salvar. O armazenamento deste aparelho está cheio.");return false;}
-  S.cfg=next; renderAll(); if(Cloud.on()&&isAdmin())pushLists(); if(msg)notify(msg); return true;
-}
-
-function addNamedTo(key,value){
-  if(Cloud.configured()&&!isAdmin())return "Somente o administrador pode alterar os cadastros da equipe.";
-  var name=String(value||"").trim();
-  if(!name)return "Escreva um nome.";
-  var list=S.cfg[key].slice();
-  if(list.some(function(x){return x.toLocaleLowerCase("pt-BR")===name.toLocaleLowerCase("pt-BR");}))return "Esse item já existe.";
-  list.push(name);
-  var next=Object.assign({},S.cfg); next[key]=list;
-  if(!commitCfg(next,"Item adicionado."))return "Não foi possível salvar.";
-  return "";
-}
-
-function persist(draft){
- if(!S.session)return Promise.resolve(false);
- var prev=S.editId?S.regs.find(function(r){return r.id===S.editId;}):null;
- if(prev&&!canChange(prev))return Promise.resolve(false);
- var id=prev?prev.id:makeId(),fotoId=draft.foto?id+"-foto-"+Date.now():(prev?prev.fotoId:null);
- return (draft.foto?putFoto(fotoId,draft.foto):Promise.resolve(true)).then(function(ok){
- if(!ok){notify("Não foi possível gravar o comprovante. Nada foi salvo. Exporte um backup e libere espaço.");return false;}
- var rec=Object.assign({},prev||{},draft);delete rec.foto;
- rec.id=id;rec.fotoId=fotoId||undefined;rec.criado=prev?prev.criado:Date.now();rec.usuario=prev?prev.usuario:S.session;
- rec.revision=prev?prev.revision||0:0;rec.pend=Cloud.configured();rec.deleted=false;
- if(draft.foto)rec.fotoPath=undefined;
- var next=prev?S.regs.map(function(r){return r.id===id?rec:r;}):[rec].concat(S.regs);
- if(!saveRegs(next)){if(draft.foto)delFoto(fotoId);notify("Falha ao gravar: armazenamento cheio ou indisponível. Nada foi salvo.");return false;}
- S.regs=next;if(draft.foto)S.fotos[fotoId]=draft.foto;
- if(prev&&prev.fotoId&&prev.fotoId!==fotoId){delFoto(prev.fotoId);delete S.fotos[prev.fotoId];}
- S.editId=null;$("cancelEdit").hidden=true;$("mSave").textContent="Salvar manutenção";
- if(Cloud.on())setTimeout(function(){syncAll(true);},50);
- return true;
- }).catch(function(){notify("Falha de armazenamento. Seu formulário foi preservado.");return false;});
-}
-function removeReg(id){
- if(SYNC.enviando||S.saving)return notify("Aguarde a operação atual terminar.");
- var cur=S.regs.find(function(r){return r.id===id;});if(!cur||!canChange(cur))return;
- var tomb=Object.assign({},cur,{deleted:true,pend:Cloud.configured()});
- var next=Cloud.configured()?S.regs.map(function(r){return r.id===id?tomb:r;}):S.regs.filter(function(r){return r.id!==id;});
- if(!saveRegs(next))return notify("Não foi possível excluir. Nada foi alterado.");
- S.regs=next;
- if(!Cloud.configured()&&cur.fotoId){delFoto(cur.fotoId);delete S.fotos[cur.fotoId];}
- renderAll();notify(Cloud.configured()?"Exclusão salva; aguardando sincronização.":"Lançamento excluído.");
- if(Cloud.on())syncAll(true);
-}
-function startEdit(id){
- if(SYNC.enviando||S.saving)return notify("Aguarde a operação atual terminar.");
- var r=S.regs.find(function(x){return x.id===id;});if(!r||!canChange(r))return;
- S.editId=id;$("cancelEdit").hidden=false;
- if(r.tipo==="manut"){
- setView("manut");renderManut();
- ["Veiculo","Cidade","Pagamento"].forEach(function(k){var el=$("m"+k),v=r[k.toLowerCase()]||"";if(v&&!Array.from(el.options).some(function(o){return o.value===v;}))el.add(new Option(v,v));el.value=v;});
- $("mQuando").value=r.quando.slice(0,16);$("mKm").value=r.km||"";$("mValor").value=Number(r.valor).toFixed(2).replace(".",",");$("mObs").value=r.obs||"";
- S.manut.itens=(r.itens||[]).slice();S.manut.foto="";renderChips();$("mSave").textContent="Salvar edição";$("mPrev").hidden=true;
- }else{
- S.sub=r.cat;setView("alim");renderAlim();$("aQuando").value=r.quando.slice(0,16);$("aCidade").value=r.cidade;$("aPagamento").value=r.pagamento;
- $("aValor").value=Number(r.valor).toFixed(2).replace(".",",");$("aObs").value=r.obs;S.alim.foto="";$("aPrev").hidden=true;
- }
- notify("Editando lançamento. O comprovante atual será mantido se não escolher outro.");
-}
-function cancelEdit(){
- S.photoToken=(S.photoToken||0)+1;S.photoLoading=false;S.editId=null;S.manut.itens=[];S.manut.foto="";S.alim.foto="";
- $("fManut").reset();$("fAlim").reset();$("mQuando").value=nowLocal();$("aQuando").value=nowLocal();
- $("mPrev").hidden=true;$("aPrev").hidden=true;$("cancelEdit").hidden=true;$("mSave").textContent="Salvar manutenção";renderAll();
-}
-
-/* ================= CSV / WhatsApp ================= */
-function toCsv(rows){
-  function cell(v){var t=String(v==null?"":v).replace(/\r?\n/g," ");if(/^[\s]*[=+\-@]/.test(t))t="'"+t;
-    if(/[;"\n,]/.test(t))return '"'+t.replace(/"/g,'""')+'"';return t;}
-  var lines=[["Tipo","Data","Veículo","Categoria / serviços","KM","Cidade","Usuário","Pagamento","Valor","Observação"].join(";")];
-  rows.forEach(function(r){
-    var tipo=r.tipo==="manut"?"Manutenção":"Alimentação";
-    var cat=r.tipo==="manut"?(r.itens||[]).join(", "):catLabel(r.cat);
-    lines.push([tipo,r.quando,r.veiculo||"",cat,(r.km?String(r.km):""),r.cidade,r.usuario,r.pagamento,
-      (isFinite(r.valor)?r.valor:0).toFixed(2).replace(".",","),r.obs].map(cell).join(";"));
   });
-  return "\uFEFF"+lines.join("\r\n");
 }
-function downloadCsv(rows){
-  try{
-    var blob=new Blob([toCsv(rows)],{type:"text/csv;charset=utf-8"});
-    var url=URL.createObjectURL(blob); var a=document.createElement("a");
-    a.href=url; a.download="relatorio_grx_"+nowLocal().slice(0,10)+".csv";
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(function(){URL.revokeObjectURL(url);},1000); return true;
-  }catch(e){return false;}
-}
-function whatsAppUrl(rows,f){
-  var total=sumValor(rows), lines=["*RELATÓRIO GRX TELECOM*",
-    "Total: "+brl(total)+" ("+rows.length+" "+(rows.length===1?"item":"itens")+")"];
-  var d=describeFilters(f); if(d)lines.push(d);
-  lines.push("");
-  rows.slice(0,15).forEach(function(r){
-    lines.push("• "+(r.tipo==="manut"?(r.veiculo||"Manutenção"):"Alimentação")+" | "+fdt(r.quando)+" | "+brl(r.valor));
+
+/* ================= inicialização ================= */
+function init(){
+  S.cfg=loadCfg(); S.regs=loadRegs(); S.session=loadSession();
+  if(!S.cfg.users.length){S.cfg=defaultConfig();}
+  if(!S.session){showLogin();}
+  else{afterAuth();}
+
+  $("loginForm").addEventListener("submit",function(ev){
+    ev.preventDefault();
+    if(S.saving)return notify("Aguarde a operação terminar.");
+    var email=String($("loginEmail").value||"").trim().toLowerCase();
+    var pass=$("loginPass").value||"";
+    var user=S.cfg.users.filter(function(u){return u.email===email;})[0];
+    if(!user){$("loginErr").hidden=false;return;}
+    checkPassword(pass,user.passHash).then(function(ok){
+      if(!ok){$("loginErr").hidden=false;return;}
+      S.session=email; afterAuth();
+    }).catch(function(){ $("loginErr").hidden=false; });
   });
-  if(rows.length>15){lines.push("");lines.push("… e mais "+(rows.length-15)+" lançamentos");}
-  return "https://api.whatsapp.com/send?text="+encodeURIComponent(lines.join("\n"));
-}
 
-/* ================= backup ================= */
-async function exportBackup(){
- if(S.saving||SYNC.enviando)return notify("Aguarde a gravação terminar.");
- $("expBtn").disabled=true;
- try{
- var missing=[],fotos=Object.create(null),regs=JSON.parse(JSON.stringify(S.regs));
- for(var r of regs){
-  if(r.deleted)continue;
-  if(r.fotoPath&&!r.fotoId){await Cloud.ensurePhoto(r);}
-  if(r.fotoId){var d=S.fotos[r.fotoId]||await getFoto(r.fotoId);if(safeImg(d))fotos[r.fotoId]=d;else missing.push(r.id);}
-  else if(r.fotoPath)missing.push(r.id);
- }
- var data={app:"grx-telecom",v:2,sourceProject:GRX_BACKEND.url||null,exportado:new Date().toISOString(),cfg:{veiculos:S.cfg.veiculos,cidades:S.cfg.cidades,pagamentos:S.cfg.pagamentos},regs:regs,fotos:fotos,missingPhotos:missing};
- var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});var url=URL.createObjectURL(blob),a=document.createElement("a");
- a.href=url;a.download="grx-backup-"+nowLocal().replace(/[:T]/g,"-")+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},30000);
- notify(missing.length?"Backup exportado com AVISO: "+missing.length+" fotos indisponíveis. Confira missingPhotos no arquivo.":"Backup exportado com "+Object.keys(fotos).length+" comprovantes. Guarde-o em local protegido.");
- }catch(e){notify("Falha ao exportar. Tente novamente antes de apagar qualquer dado.");}finally{$("expBtn").disabled=false;}
-}
-async function importBackup(file){
- if(S.saving||SYNC.enviando)return notify("Aguarde a gravação terminar.");
- if(Cloud.configured()&&!isAdmin())return notify("Somente o administrador pode importar na nuvem.");
- if(file.size>100*1024*1024)return notify("Backup acima de 100 MB. Divida os dados com suporte técnico.");
- var written=[];
- try{
- var data=JSON.parse(await file.text());
- if(!data||data.app!=="grx-telecom"||![1,2].includes(data.v)||!Array.isArray(data.regs)||!data.cfg)throw new Error("Arquivo não é um backup GRX válido.");
- var ids=new Set(),regs=data.regs.map(function(raw){var r=normalizeReg(raw);if(!r||r.id!==raw.id||ids.has(r.id))throw new Error("Lançamento inválido ou ID duplicado. Importação cancelada.");ids.add(r.id);return r;});
- var cfg=Object.assign({},S.cfg);["veiculos","cidades","pagamentos"].forEach(function(k){if(!Array.isArray(data.cfg[k])||data.cfg[k].some(function(x){return typeof x!=="string"||x.length>160;}))throw new Error("Cadastros inválidos.");cfg[k]=uniq(data.cfg[k],[]);});
- var fotos=data.fotos||{};
- var migrating=Cloud.configured()&&data.sourceProject!==GRX_BACKEND.url;
- if(migrating)for(var r of regs){
-  if(r.fotoPath&&(!r.fotoId||!safeImg(fotos[r.fotoId])))throw new Error("Migração exige comprovantes dentro do backup. Exporte as fotos no sistema de origem antes de prosseguir.");
-  r.cloudSaved=false;r.revision=0;r.pend=false;r.syncError="";r.fotoPath=undefined;
- }
- for(var r of regs){if(r.fotoId&&!safeImg(fotos[r.fotoId])&&!r.fotoPath)throw new Error("Backup incompleto: falta comprovante. Nenhum dado foi substituído.");}
- if(!confirm("Importar "+regs.filter(function(r){return !r.deleted;}).length+" lançamentos e substituir a base LOCAL de "+activeRegs().length+"?\nExporte um backup antes. Contas e senhas atuais serão preservadas. Na nuvem, nada é apagado automaticamente; use Enviar tudo após conferir."))return;
- S.saving=true;
- for(var r of regs){if(r.fotoId&&safeImg(fotos[r.fotoId])){var key=makeId()+"-import";if(!await putFoto(key,fotos[r.fotoId]))throw new Error("Espaço insuficiente para restaurar as fotos.");written.push(key);r.fotoId=key;}}
- var oldR=localStorage.getItem(REGS_KEY),oldC=localStorage.getItem(CFG_KEY);
- if(!saveCfg(cfg)||!saveRegs(regs)){
- if(oldC===null)localStorage.removeItem(CFG_KEY);else localStorage.setItem(CFG_KEY,oldC);
- if(oldR===null)localStorage.removeItem(REGS_KEY);else localStorage.setItem(REGS_KEY,oldR);
- throw new Error("Espaço insuficiente. Base anterior preservada.");}
- S.cfg=cfg;S.regs=regs;S.fotos={};for(var r of regs){if(r.fotoId){var d=await getFoto(r.fotoId);if(d)S.fotos[r.fotoId]=d;}}
- written=[];cancelEdit();renderAll();notify("Backup restaurado. As contas e senhas deste aparelho foram mantidas.");
- }catch(e){for(var key of written)await delFoto(key);notify(e.message||"Backup inválido. Nenhum dado alterado.");}finally{S.saving=false;}
-}
-
-/* ================= eventos ================= */
-function bind(){
-  /* login */
-  $("loginForm").addEventListener("submit",async function(ev){
- ev.preventDefault();if($("loginBtn").disabled)return;$("loginBtn").disabled=true;
- try{
- var email=$("loginEmail").value.trim().toLowerCase(),pass=$("loginPass").value;
- if(Cloud.configured()){
-  if(!Cloud.init())throw new Error("Nuvem indisponível. Verifique a configuração e sua conexão.");
-  await Cloud.login(email,pass);
- }else{
-  var user=S.cfg.users.find(function(u){return u.email===email;});
-  if(!user||!user.passHash||!await checkPassword(pass,user.passHash))throw new Error("E-mail ou senha incorretos.");
-  S.session=user.email;
- }
- $("loginErr").hidden=true;$("loginPass").value="";afterAuth();
- }catch(e){$("loginErr").textContent=e.message||"Não foi possível entrar.";$("loginErr").hidden=false;}
- finally{$("loginBtn").disabled=false;}
- });
- $("setPassForm").addEventListener("submit",async function(ev){
- ev.preventDefault();var err=$("setPassErr"),btn=this.querySelector("button");
- if(Cloud.configured()||S.cfg.users.some(function(u){return u.email===ADMIN_EMAIL&&u.passHash;})){err.hidden=false;err.textContent="Administrador já configurado. Não é possível redefinir a senha sem autenticação.";return;}
- var a=$("newPass").value,b=$("newPass2").value;
- if(a.length<8||a.length>128){err.hidden=false;err.textContent="Use entre 8 e 128 caracteres.";return;}
- if(a!==b){err.hidden=false;err.textContent="As senhas não conferem.";return;}
- btn.disabled=true;
- try{
- var cfg=Object.assign({},S.cfg),hash=await newPassword(a);
- cfg.users=cfg.users.filter(function(u){return u.email!==ADMIN_EMAIL;}).concat([{email:ADMIN_EMAIL,passHash:hash,admin:true}]);
- if(!saveCfg(cfg))throw new Error("Não foi possível salvar neste aparelho.");
- S.cfg=cfg;$("newPass").value="";$("newPass2").value="";showLogin();$("loginEmail").value=ADMIN_EMAIL;notify("Senha definida. Faça login.");
- }catch(e){err.hidden=false;err.textContent=e.message;}finally{btn.disabled=false;}
- });
+  $("setPassForm").addEventListener("submit",async function(ev){
+    ev.preventDefault();
+    var p1=$("newPass").value||"";
+    var p2=$("newPass2").value||"";
+    var err=$("setPassErr");
+    if(p1.length<8){err.hidden=false; err.textContent="Use pelo menos 8 caracteres."; return;}
+    if(p1!==p2){err.hidden=false; err.textContent="As senhas não conferem."; return;}
+    try{
+      var h=await newPassword(p1);
+      var list=S.cfg.users||[];
+      var existing=list.find(function(u){return u.email===ADMIN_EMAIL;});
+      if(existing){existing.passHash=h; existing.admin=true;} else {list.push({email:ADMIN_EMAIL,passHash:h,admin:true});}
+      S.cfg.users=list;
+      lsSet(CFG_KEY,S.cfg);
+      err.hidden=true;
+      $("setPassForm").reset();
+      notify("Senha do administrador salva.");
+    }catch(e){err.hidden=false; err.textContent="Não foi possível criar a senha segura neste navegador.";}
+  });
 
   $("logoffTop").addEventListener("click",logout);
   $("logoffBtn").addEventListener("click",logout);
 
-  /* nav */
-  Array.prototype.forEach.call(document.querySelectorAll("[data-nav]"),function(b){
-    b.addEventListener("click",function(){if(S.editId)return notify("Salve ou cancele a edição antes de mudar de seção.");setView(b.getAttribute("data-nav"));});
-  });
-
-  /* manutenção */
-  $("mQuando").value=S.manut.quando; $("aQuando").value=S.alim.quando;
   $("mVeiculo").addEventListener("change",function(){renderManut();});
-  $("itensWrap").addEventListener("click",function(ev){
-    var b=ev.target.closest("[data-item]"); if(!b)return;
-    var it=b.getAttribute("data-item"), i=S.manut.itens.indexOf(it);
-    if(i>=0)S.manut.itens.splice(i,1); else S.manut.itens.push(it);
-    renderChips();
-  });
+  $("mVeiculo").addEventListener("change",function(){if(!S.manut.veiculo||!S.cfg.veiculos.includes(S.manut.veiculo))S.manut.veiculo="";});
+  $("aFoto").addEventListener("change",function(ev){choosePhoto(ev,"a","alim");});
   $("mFoto").addEventListener("change",function(ev){choosePhoto(ev,"m","manut");});
+
   document.querySelector('[data-clear="manut"]').addEventListener("click",function(){
     S.photoToken=(S.photoToken||0)+1;S.photoLoading=false; S.manut.foto=""; $("mFoto").value=""; $("mPrev").hidden=true; $("mPrevImg").removeAttribute("src");
   });
+  document.querySelector('[data-clear="alim"]').addEventListener("click",function(){
+    S.photoToken=(S.photoToken||0)+1;S.photoLoading=false; S.alim.foto=""; $("aFoto").value=""; $("aPrev").hidden=true; $("aPrevImg").removeAttribute("src");
+  });
+
+  $("itensWrap").addEventListener("click",function(ev){
+    var b=ev.target.closest(".chip"); if(!b)return;
+    var it=b.getAttribute("data-item");
+    var idx=S.manut.itens.indexOf(it);
+    if(idx>=0)S.manut.itens.splice(idx,1); else S.manut.itens.push(it);
+    renderChips();
+  });
+
+  $("alimTabs").addEventListener("click",function(ev){
+    var b=ev.target.closest("[data-cat]"); if(!b)return;
+    if(S.editId)return notify("Salve ou cancele a edição antes de mudar a categoria.");
+    S.sub=b.getAttribute("data-cat"); renderAlim();
+  });
+
   $("fManut").addEventListener("submit",function(ev){
     ev.preventDefault();
     if(S.saving||SYNC.enviando)return notify("Aguarde a operação atual terminar.");
     if(S.photoLoading)return notify("Aguarde o processamento do comprovante.");
     var d=S.manut;
-    d.quando=$("mQuando").value; d.veiculo=$("mVeiculo").value;
-    d.cidade=$("mCidade").value; d.pagamento=$("mPagamento").value;
-    d.km=$("mKm").value; d.valor=$("mValor").value; d.obs=$("mObs").value;
-    if(S.editId&&S.regs.find(function(r){return r.id===S.editId;}).tipo!==(ev.target.id==="fManut"?"manut":"alim"))return notify("Conclua a edição na seção original.");
+    d.quando=$("mQuando").value; d.veiculo=$("mVeiculo").value; d.cidade=$("mCidade").value;
+    d.pagamento=$("mPagamento").value; d.km=$("mKm").value; d.valor=$("mValor").value; d.obs=$("mObs").value;
     if(!d.quando)return notify("Informe a data e a hora.");
     if(!d.veiculo)return notify("Selecione o veículo.");
     if(!d.itens.length&&!d.obs.trim())return notify("Marque um item ou escreva uma observação.");
@@ -1263,16 +1059,6 @@ function bind(){
     });
   });
 
-  /* alimentação */
-  $("alimTabs").addEventListener("click",function(ev){
-    var b=ev.target.closest("[data-cat]"); if(!b)return;
-    if(S.editId)return notify("Salve ou cancele a edição antes de mudar a categoria.");
-    S.sub=b.getAttribute("data-cat"); renderAlim();
-  });
-  $("aFoto").addEventListener("change",function(ev){choosePhoto(ev,"a","alim");});
-  document.querySelector('[data-clear="alim"]').addEventListener("click",function(){
-    S.photoToken=(S.photoToken||0)+1;S.photoLoading=false; S.alim.foto=""; $("aFoto").value=""; $("aPrev").hidden=true; $("aPrevImg").removeAttribute("src");
-  });
   $("fAlim").addEventListener("submit",function(ev){
     ev.preventDefault();
     if(S.saving||SYNC.enviando)return notify("Aguarde a operação atual terminar.");
@@ -1280,9 +1066,7 @@ function bind(){
     var d=S.alim;
     d.quando=$("aQuando").value; d.cidade=$("aCidade").value;
     d.pagamento=$("aPagamento").value; d.valor=$("aValor").value; d.obs=$("aObs").value;
-    if(S.editId&&S.regs.find(function(r){return r.id===S.editId;}).tipo!==(ev.target.id==="fManut"?"manut":"alim"))return notify("Conclua a edição na seção original.");
     if(!d.quando)return notify("Informe a data e a hora.");
-    if(S.sub==="viagem"&&!d.cidade)return notify("Selecione a cidade de destino.");
     if(!String(d.valor).trim())return notify("Informe o valor.");
     var vA=parseMoney(d.valor);
     if(isNaN(vA))return notify("Valor inválido. Use, por exemplo: 123,45");
@@ -1292,352 +1076,95 @@ function bind(){
       S.saving=false; $("aSave").disabled=false;
       if(!ok)return;
       S.alim={quando:nowLocal(),cidade:"",pagamento:"",valor:"",obs:"",foto:""};
-      $("aQuando").value=S.alim.quando; $("aValor").value=""; $("aObs").value="";
-      $("aCidade").value=""; $("aPagamento").value=""; $("aFoto").value=""; $("aPrev").hidden=true;
+      $("aQuando").value=S.alim.quando; $("aValor").value=""; $("aObs").value=""; $("aCidade").value=""; $("aPagamento").value=""; $("aFoto").value=""; $("aPrev").hidden=true;
       renderAll(); notify("Lançamento salvo com sucesso!");
     });
   });
 
-  /* consulta */
-  $("cVeiculo").addEventListener("change",function(){S.filters.veiculo=this.value;renderCons();});
-  $("cCidade").addEventListener("change",function(){S.filters.cidade=this.value;renderCons();});
-  $("cUsuario").addEventListener("change",function(){S.filters.usuario=this.value;renderCons();});
-  $("cPagamento").addEventListener("change",function(){S.filters.pagamento=this.value;renderCons();});
-  $("cTipo").addEventListener("change",function(){S.filters.tipo=this.value;renderCons();});
-  $("cDe").addEventListener("change",function(){S.filters.de=this.value;renderCons();});
-  $("cAte").addEventListener("change",function(){S.filters.ate=this.value;renderCons();});
   $("cLimpar").addEventListener("click",function(){
-    S.filters={veiculo:"",cidade:"",usuario:"",pagamento:"",tipo:"",de:"",ate:""}; renderCons();
-  });
-  Array.prototype.forEach.call(document.querySelectorAll("[data-act]"),function(b){
-    b.addEventListener("click",function(){
-      var ap=appliedFilters();if(ap.de&&ap.ate&&ap.de>ap.ate)return notify("Ajuste o período antes de exportar.");var rows=filterRegs(activeRegs(),ap), kind=b.getAttribute("data-act");
-      if(!rows.length)return notify("Nenhum lançamento com esses filtros.");
-      if(kind==="pdf"){window.print();return;}
-      if(kind==="whats"){window.open(whatsAppUrl(rows,ap),"_blank","noopener,noreferrer");return;}
-      if(!downloadCsv(rows))notify("Não foi possível gerar o arquivo.");
-    });
+    S.filters={veiculo:"",cidade:"",usuario:"",pagamento:"",tipo:"",de:"",ate:""};
+    $("cVeiculo").value=""; $("cCidade").value=""; $("cUsuario").value=""; $("cPagamento").value=""; $("cTipo").value=""; $("cDe").value=""; $("cAte").value="";
+    renderCons();
   });
 
-  ["mValor","aValor"].forEach(function(id){
-    var el=$(id);
-    el.addEventListener("blur",function(){
-      var v=parseMoney(el.value);
-      if(!isNaN(v))el.value=v.toFixed(2).replace(".",",");
-    });
+  $("fCons").addEventListener("submit",function(ev){ev.preventDefault(); renderCons();});
+  $("cVeiculo").addEventListener("change",function(){S.filters.veiculo=this.value; renderCons();});
+  $("cCidade").addEventListener("change",function(){S.filters.cidade=this.value; renderCons();});
+  $("cUsuario").addEventListener("change",function(){S.filters.usuario=this.value; renderCons();});
+  $("cPagamento").addEventListener("change",function(){S.filters.pagamento=this.value; renderCons();});
+  $("cTipo").addEventListener("change",function(){S.filters.tipo=this.value; renderCons();});
+  $("cDe").addEventListener("change",function(){S.filters.de=this.value; renderCons();});
+  $("cAte").addEventListener("change",function(){S.filters.ate=this.value; renderCons();});
+
+  $("mList").addEventListener("click",function(ev){
+    var edit=ev.target.closest("[data-edit]"); if(edit){
+      var id=edit.getAttribute("data-edit"); var reg=S.regs.find(function(r){return r.id===id;}); if(!reg)return;
+      S.editId=id; S.manut={quando:reg.quando||nowLocal(),veiculo:reg.veiculo||"",cidade:reg.cidade||"",pagamento:reg.pagamento||"",km:reg.km||"",valor:String(reg.valor),itens:Array.isArray(reg.itens)?reg.itens.slice():[],obs:reg.obs||"",foto:""};
+      $("mQuando").value=reg.quando; $("mVeiculo").value=reg.veiculo||""; $("mCidade").value=reg.cidade||""; $("mPagamento").value=reg.pagamento||""; $("mKm").value=reg.km||""; $("mValor").value=reg.valor; $("mObs").value=reg.obs||""; renderChips();
+      $("cancelEdit").hidden=false;  
+    }
+    var del=ev.target.closest("[data-del]"); if(del){
+      var id=del.getAttribute("data-del"); markDeleted(id); 
+    }
+    var res=ev.target.closest("[data-resolve]"); if(res){
+      var id=res.getAttribute("data-resolve"); resolveConflict(id); 
+    }
   });
 
-  /* cadastros */
-  Array.prototype.forEach.call(document.querySelectorAll("form[data-named]"),function(f){
-    f.addEventListener("submit",function(ev){
-      ev.preventDefault();
-      var key=f.getAttribute("data-named"), input=f.querySelector("input");
-      var msg=addNamedTo(key,input.value);
-      var err=document.querySelector('[data-err="'+key+'"]');
-      err.hidden=!msg; err.textContent=msg;
-      if(!msg)input.value="";
-    });
+  $("aList").addEventListener("click",function(ev){
+    var edit=ev.target.closest("[data-edit]"); if(edit){
+      var id=edit.getAttribute("data-edit"); var reg=S.regs.find(function(r){return r.id===id;}); if(!reg)return;
+      S.editId=id; S.alim={quando:reg.quando||nowLocal(),cidade:reg.cidade||"",pagamento:reg.pagamento||"",valor:String(reg.valor),obs:reg.obs||"",foto:""};
+      $("aQuando").value=reg.quando; $("aCidade").value=reg.cidade||""; $("aPagamento").value=reg.pagamento||""; $("aValor").value=reg.valor; $("aObs").value=reg.obs||""; $("cancelEdit").hidden=false;
+    }
+    var del=ev.target.closest("[data-del]"); if(del){
+      var id=del.getAttribute("data-del"); markDeleted(id); 
+    }
+    var res=ev.target.closest("[data-resolve]"); if(res){
+      var id=res.getAttribute("data-resolve"); resolveConflict(id); 
+    }
   });
+
+  $("cancelEdit").addEventListener("click",function(){
+    S.editId=null; $("cancelEdit").hidden=true;
+    $("mQuando").value=nowLocal(); $("aQuando").value=nowLocal();
+    $("mVeiculo").value=""; $("mCidade").value=""; $("mPagamento").value=""; $("mKm").value=""; $("mValor").value=""; $("mObs").value=""; $("aCidade").value=""; $("aPagamento").value=""; $("aValor").value=""; $("aObs").value=""; 
+    S.manut.itens=[]; S.alim={quando:nowLocal(),cidade:"",pagamento:"",valor:"",obs:"",foto:""};
+    renderAll();
+  });
+
+  $("cList").addEventListener("click",function(ev){
+    var edit=ev.target.closest("[data-edit]"); if(edit){
+      var id=edit.getAttribute("data-edit"); var reg=S.regs.find(function(r){return r.id===id;}); if(!reg)return;
+      if(reg.tipo==="manut"){
+        S.editId=id; S.view="manut"; setView("manut");
+        S.manut={quando:reg.quando||nowLocal(),veiculo:reg.veiculo||"",cidade:reg.cidade||"",pagamento:reg.pagamento||"",km:reg.km||"",valor:String(reg.valor),itens:Array.isArray(reg.itens)?reg.itens.slice():[],obs:reg.obs||"",foto:""};
+        $("mQuando").value=reg.quando; $("mVeiculo").value=reg.veiculo||""; $("mCidade").value=reg.cidade||""; $("mPagamento").value=reg.pagamento||""; $("mKm").value=reg.km||""; $("mValor").value=reg.valor; $("mObs").value=reg.obs||""; renderChips();
+      } else {
+        S.editId=id; S.view="alim"; setView("alim");
+        S.alim={quando:reg.quando||nowLocal(),cidade:reg.cidade||"",pagamento:reg.pagamento||"",valor:String(reg.valor),obs:reg.obs||"",foto:""};
+        $("aQuando").value=reg.quando; $("aCidade").value=reg.cidade||""; $("aPagamento").value=reg.pagamento||""; $("aValor").value=reg.valor; $("aObs").value=reg.obs||"";
+      }
+      $("cancelEdit").hidden=false;
+    }
+    var del=ev.target.closest("[data-del]"); if(del){ markDeleted(del.getAttribute("data-del")); }
+  });
+
   document.addEventListener("click",function(ev){
-    var pill=ev.target.closest("[data-delitem]");
-    if(pill){
-      if(Cloud.configured()&&!isAdmin())return;
-      var key=pill.getAttribute("data-delitem"), i=Number(pill.getAttribute("data-i"));
-      var next=Object.assign({},S.cfg);
-      next[key]=S.cfg[key].filter(function(_,idx){return idx!==i;});
-      commitCfg(next,"Item removido."); return;
+    var z=ev.target.closest("[data-zoom]"); if(z){
+      var id=z.getAttribute("data-zoom"); var reg=S.regs.find(function(r){return r.id===id;}); if(!reg)return;
+      var src=photoSrc(reg); if(!src)return;
+      $("lbImg").src=src; $("lb").hidden=false;
     }
-    var rb=ev.target.closest("[data-resolve]");if(rb){resolveConflict(rb.getAttribute("data-resolve"));return;}
-    var eb=ev.target.closest("[data-edit]");if(eb){startEdit(eb.getAttribute("data-edit"));return;}
-    var ub=ev.target.closest("[data-userdel]");
-    if(ub){
-      if(!isAdmin()||Cloud.configured())return;
-      var idx=Number(ub.getAttribute("data-userdel"));
-      var target=S.cfg.users[idx]; if(!target)return;
-      if(target.email===S.session){notify("Você não pode remover o próprio acesso.");return;}
-      var admins=S.cfg.users.filter(function(u){return u.admin;}).length;
-      if(S.cfg.users.length<2||(target.admin&&admins<2)){notify("Não pode remover o último administrador.");return;}
-      if(S.arm!==idx){ S.arm=idx; ub.classList.add("arm"); ub.textContent="Confirmar";
-        setTimeout(function(){S.arm=null;ub.classList.remove("arm");ub.textContent="×";},3000); return; }
-      var next=Object.assign({},S.cfg);
-      next.users=S.cfg.users.filter(function(_,k){return k!==idx;});
-      S.arm=null; commitCfg(next,"Usuário removido."); return;
-    }
-    var del=ev.target.closest("[data-del]");
-    if(del){
-      var id=del.getAttribute("data-del");
-      if(S.arm!==id){ S.arm=id; del.classList.add("arm"); del.textContent="Confirmar";
-        setTimeout(function(){S.arm=null;del.classList.remove("arm");del.textContent="Excluir";},3000); return; }
-      S.arm=null; removeReg(id); return;
-    }
-    var z=ev.target.closest("[data-zoom]");
-    if(z){ var reg=S.regs.filter(function(r){return r.id===z.getAttribute("data-zoom");})[0];
-      var src=photoSrc(reg);
-      if(src){S.lbTrigger=z;$("lbImg").src=src;$("lb").hidden=false;$("app").inert=true;$("lbClose").focus();} return; }
-  });
-  $("fUser").addEventListener("submit",async function(ev){
-    ev.preventDefault();
-    if(!isAdmin()||Cloud.configured())return;
-    var email=String($("uEmail").value||"").trim().toLowerCase();
-    var pass=$("uPass").value, err=$("uErr");
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||pass.length<8||pass.length>128){err.hidden=false;err.textContent="Informe um e-mail válido e senha de 8 a 128 caracteres.";return;}
-    if(S.cfg.users.some(function(u){return u.email===email;})){err.hidden=false;err.textContent="E-mail já cadastrado.";return;}
-    err.hidden=true;
-    var next=Object.assign({},S.cfg);
-    try{next.users=S.cfg.users.concat([{email:email,passHash:await newPassword(pass),admin:false}]);}catch(e){err.hidden=false;err.textContent=e.message;return;}
-    if(!commitCfg(next,"Usuário cadastrado!")){err.hidden=false;err.textContent="Não foi possível salvar.";return;}
-    $("uEmail").value=""; $("uPass").value="";
-  });
-  $("expBtn").addEventListener("click",exportBackup);
-  $("impBtn").addEventListener("click",function(){$("impFile").click();});
-  $("impFile").addEventListener("change",function(ev){
-    var f=ev.target.files&&ev.target.files[0]; if(f)importBackup(f); ev.target.value="";
+    var close=ev.target.closest("#lbClose"); if(close)$("lb").hidden=true;
+    var y=ev.target.closest("#lb"); if(y&&!(ev.target.closest("img")))$("lb").hidden=true;
   });
 
-  if($("syncBtn"))$("syncBtn").addEventListener("click",function(){syncAll();});
-  if($("pushBtn"))$("pushBtn").addEventListener("click",function(){
-    if(!confirm("Enviar todos os "+S.regs.length+" lançamentos deste aparelho para a nuvem?"))return;
-    syncFull();
-  });
-
-  $("cancelEdit").addEventListener("click",cancelEdit);
-  document.addEventListener("keydown",function(ev){if((ev.key==="Enter"||ev.key===" ")&&ev.target.matches("[data-zoom]")){ev.preventDefault();ev.target.click();}});
-  /* lightbox */
-  function closeLightbox(){$("lb").hidden=true;$("app").inert=false;if(S.lbTrigger&&S.lbTrigger.isConnected)S.lbTrigger.focus();}
-  $("lbClose").addEventListener("click",closeLightbox);
-  $("lb").addEventListener("click",function(ev){if(ev.target===$("lb"))closeLightbox();});
-  document.addEventListener("keydown",function(ev){if(!$("lb").hidden){if(ev.key==="Escape")closeLightbox();if(ev.key==="Tab"){ev.preventDefault();$("lbClose").focus();}}});
+  renderAll();
 }
 
-/* ================= NUVEM (Supabase) =================
-   Preencha url + anonKey para a equipe compartilhar lançamentos e comprovantes.
-   Deixando em branco, o app funciona 100% local (dados só neste aparelho).
-   A chave "anon" é pública por desenho: a proteção vem das políticas RLS (veja o README).
-*/
-var GRX_BACKEND = Object.assign({
-  url: "",                     // ex.: "https://xxxxxxxxxxxx.supabase.co"
-  anonKey: "",                 // ex.: "eyJhbGciOiJIUzI1NiIsInR5cCI6..."
-  bucket: "grx-comprovantes",
-  table: "grx_regs",
-  cfgTable: "grx_config",
-  cfgRow: "listas",
-  fotoMax: 1280,
-  fotoQuality: 0.75
-},window.GRX_CONFIG||{});
-
-var Cloud=(function(){
- var client=null,lastErr="",user=null,verified=false,signed=Object.create(null);
- function configured(){return !!(String(GRX_BACKEND.url||"").trim()||String(GRX_BACKEND.anonKey||"").trim());}
- function init(){
- if(!configured())return false;if(client)return true;
- try{if(!/^https:\/\/[a-z0-9.-]+(?::\d+)?\/?$/i.test(GRX_BACKEND.url)||!GRX_BACKEND.anonKey)throw new Error();
- if(!window.supabase)throw new Error();client=window.supabase.createClient(GRX_BACKEND.url,GRX_BACKEND.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});return true;
- }catch(e){lastErr="Configuração incompleta ou biblioteca indisponível";return false;}
- }
- function on(){return !!client&&!!user;}
- function status(){return !configured()?"off":!client?"err":!user?"auth":verified?"on":"waiting";}
- async function accept(u){
- var r=await client.from("grx_members").select("email,admin").eq("user_id",u.id).eq("active",true).single();
- if(r.error||!r.data)throw new Error("Conta sem autorização. Solicite inclusão em grx_members ao administrador.");
- user=u;S.session=u.email.toLowerCase();
- var members=await client.from("grx_members").select("email,admin").eq("active",true);
- S.cfg.users=members.data&&members.data.length?members.data:[r.data];
- var session=await client.auth.getSession();
- if(session.data.session)lsSet(CFG_KEY+"_identity",{user:{id:u.id,email:u.email},members:S.cfg.users,expires:session.data.session.expires_at*1000});
- return true;
- }
- async function login(email,password){
- if(!init())throw new Error(lastErr);
- var r=await client.auth.signInWithPassword({email:email,password:password});
- if(r.error)throw new Error("Não foi possível entrar. Verifique e-mail, senha e conexão.");
- try{return await accept(r.data.user);}catch(e){await client.auth.signOut();throw e;}
- }
- async function restore(){if(!init())return false;
- if(!navigator.onLine){var cached=lsGet(CFG_KEY+"_identity");if(cached&&cached.expires>Date.now()&&cached.user&&Array.isArray(cached.members)){user=cached.user;S.session=user.email.toLowerCase();S.cfg.users=cached.members;return true;}return false;}
- var r=await client.auth.getSession();if(r.error||!r.data.session)return false;
- var check=await client.auth.getUser();if(check.error||!check.data.user)return false;return accept(check.data.user);}
- function signOut(){try{localStorage.removeItem(CFG_KEY+"_identity");}catch(e){}user=null;verified=false;signed=Object.create(null);if(client)client.auth.signOut({scope:"local"}).catch(function(){});}
- function toBlob(data){var m=/^data:image\/(jpeg|png|webp);base64,([\s\S]+)$/.exec(data||"");if(!m)return null;var bin=atob(m[2]),b=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)b[i]=bin.charCodeAt(i);return new Blob([b],{type:"image/"+m[1]});}
- async function uploadPhoto(path,data){
- if(!on())return "";try{var blob=toBlob(data);if(!blob)throw new Error("Comprovante inválido");var r=await client.storage.from(GRX_BACKEND.bucket).upload(path,blob,{upsert:true,contentType:blob.type});if(r.error)throw r.error;return path;}catch(e){lastErr=e.message||"Falha no upload";return "";}
- }
- function publicUrl(path){var x=signed[path];return x&&x.expires>Date.now()?x.url:"";}
- async function photoUrl(path){if(!on()||!path)return "";if(publicUrl(path))return publicUrl(path);var r=await client.storage.from(GRX_BACKEND.bucket).createSignedUrl(path,3600);if(r.error)return "";signed[path]={url:r.data.signedUrl,expires:Date.now()+3500000};return r.data.signedUrl;}
- async function ensurePhoto(rec){
- if(!rec||!rec.fotoPath)return;
- var key=rec.fotoId||rec.id+"-cloud",existing=await getFoto(key);if(safeImg(existing)){rec.fotoId=key;S.fotos[key]=existing;return;}
- var url=await photoUrl(rec.fotoPath);if(!url)return;
- try{var res=await fetch(url);if(!res.ok)throw new Error();var blob=await res.blob();if(blob.size>6000000||!/^image\/(jpeg|png|webp)$/.test(blob.type))return;
- var data=await new Promise(function(resolve,reject){var f=new FileReader();f.onload=function(){resolve(String(f.result));};f.onerror=reject;f.readAsDataURL(blob);});
- if(safeImg(data)&&await putFoto(key,data)){rec.fotoId=key;S.fotos[key]=data;}
- }catch(e){}
- }
- function toRow(r){return {id:r.id,tipo:r.tipo,quando:r.quando,cidade:r.cidade||"",pagamento:r.pagamento||"",valor:r.valor,obs:r.obs||"",usuario:r.usuario,criado:r.criado,foto_path:r.fotoPath||null,veiculo:r.veiculo||null,km:r.km||0,itens:r.itens||[],cat:r.cat||null,deleted:r.deleted===true};}
- function fromRow(r){var x=normalizeReg(Object.assign({},r,{fotoPath:r.foto_path,cloudSaved:true,pend:false}));return x;}
- async function upsertRow(rec){
- if(!on())return false;
- try{
- var payload=toRow(rec),r;
- if(rec.cloudSaved)r=await client.from(GRX_BACKEND.table).update(payload).eq("id",rec.id).eq("revision",rec.revision||0).select("revision").single();
- else r=await client.from(GRX_BACKEND.table).insert(payload).select("revision").single();
- if(r.error){
- // A lost response must be retried idempotently, not duplicate the row.
- var old=await client.from(GRX_BACKEND.table).select("*").eq("id",rec.id).maybeSingle();
- if(old.data&&Object.keys(payload).every(function(k){return JSON.stringify(old.data[k])===JSON.stringify(payload[k]);})){
- rec.revision=old.data.revision;rec.cloudSaved=true;verified=true;return true;}
- throw new Error(r.error.code==="PGRST116"||r.error.code==="23505"?"Conflito: registro alterado em outro aparelho. Exporte backup antes de resolver com o administrador.":r.error.message);
- }
- rec.revision=r.data.revision;rec.cloudSaved=true;verified=true;lastErr="";return true;
- }catch(e){lastErr=e.message||"Falha de gravação";return false;}
- }
- async function fetchRows(){
- if(!on())return null;
- try{var all=[],start=0;
- while(true){var r=await client.from(GRX_BACKEND.table).select("*").order("id",{ascending:true}).range(start,start+499);if(r.error)throw r.error;
- for(var raw of r.data||[]){var x=fromRow(raw);if(!x)throw new Error("Registro inválido no servidor. Nada foi mesclado.");all.push(x);}
- if((r.data||[]).length<500)break;start+=500;}
- verified=true;lastErr="";return all;
- }catch(e){verified=false;lastErr=e.message||"Falha de leitura";return null;}
- }
- async function fetchOne(id){if(!on())return null;var r=await client.from(GRX_BACKEND.table).select("*").eq("id",id).single();return r.error||!r.data?null:fromRow(r.data);}
- async function fetchConfig(){if(!on())return null;var r=await client.from(GRX_BACKEND.cfgTable).select("data").eq("id",GRX_BACKEND.cfgRow).maybeSingle();if(r.error){lastErr=r.error.message;return null;}return r.data?r.data.data:null;}
- async function saveConfig(payload){if(!on()||!isAdmin())return false;var r=await client.from(GRX_BACKEND.cfgTable).upsert({id:GRX_BACKEND.cfgRow,data:payload,updated:Date.now()});if(r.error){lastErr=r.error.message;return false;}return true;}
- return {init:init,on:on,status:status,configured:configured,err:function(){return lastErr;},login:login,restore:restore,signOut:signOut,uploadPhoto:uploadPhoto,publicUrl:publicUrl,ensurePhoto:ensurePhoto,upsertRow:upsertRow,fetchRows:fetchRows,fetchOne:fetchOne,fetchConfig:fetchConfig,saveConfig:saveConfig,toBlob:toBlob,userId:function(){return user?user.id:"";}};
-})();
-var SYNC={ultimo:0,enviando:false,promise:null};
-function photoSrc(reg){if(!reg)return "";return reg.fotoId&&safeImg(S.fotos[reg.fotoId])||reg.fotoPath&&Cloud.publicUrl(reg.fotoPath)||"";}
-function pendingList(){return S.regs.filter(function(r){return r.pend===true;});}
-async function syncPush(){
- if(!Cloud.on())return false;
- for(var rec of pendingList()){
-  if(rec.fotoId&&!rec.fotoPath&&!rec.deleted){
-   var data=S.fotos[rec.fotoId]||await getFoto(rec.fotoId);
-   if(!safeImg(data)){notify("Comprovante pendente indisponível. O lançamento NÃO foi marcado como enviado.");continue;}
-   var path=Cloud.userId()+"/"+rec.id+"-"+rec.fotoId.slice(-16).replace(/[^a-z0-9_-]/gi,"")+".jpg";
-   rec.fotoPath=await Cloud.uploadPhoto(path,data);if(!rec.fotoPath){rec.syncError=Cloud.err()||"Falha no upload";saveRegs(S.regs);continue;}
-  }
-  if(await Cloud.upsertRow(rec)){rec.pend=false;rec.syncError="";}
-  else rec.syncError=Cloud.err()||"Falha de gravação";
-  if(!saveRegs(S.regs))throw new Error("Sem espaço para confirmar a sincronização local. Exporte backup.");
- }
- return pendingList().length===0;
-}
-async function pullLists(){
- var d=await Cloud.fetchConfig();if(!d||S.cfg._pendingLists)return;
- var next=Object.assign({},S.cfg);["veiculos","cidades","pagamentos"].forEach(function(k){if(Array.isArray(d[k]))next[k]=uniq(d[k],[]);});
- if(saveCfg(next))S.cfg=next;
-}
-async function pushLists(){
- var payload={veiculos:S.cfg.veiculos.slice(),cidades:S.cfg.cidades.slice(),pagamentos:S.cfg.pagamentos.slice()},snapshot=JSON.stringify(payload);
- var ok=await Cloud.saveConfig(payload);
- if(ok&&JSON.stringify({veiculos:S.cfg.veiculos,cidades:S.cfg.cidades,pagamentos:S.cfg.pagamentos})===snapshot){S.cfg._pendingLists=false;saveCfg(S.cfg);}
- if(!ok)notify("Cadastros guardados neste aparelho; envio pendente. Tente sincronizar ao recuperar a conexão.");return ok;
-}
-
-function mergeCloudRows(rows){
- var byId=new Map(S.regs.map(function(r){return [r.id,r];}));
- rows.forEach(function(r){var old=byId.get(r.id);if(old&&old.pend)return;if(old){r.fotoId=old.fotoId;}byId.set(r.id,r);});
- var merged=Array.from(byId.values());if(!saveRegs(merged))throw new Error("Não foi possível gravar dados recebidos. Base local preservada.");S.regs=merged;
-}
-function syncAll(quiet){
- if(SYNC.promise)return SYNC.promise;
- if(!Cloud.on()){if(!quiet)notify("Entre na nuvem para sincronizar. Consulte o guia.");return Promise.resolve(false);}
- if(S.saving||!navigator.onLine)return Promise.resolve(false);
- SYNC.enviando=true;refreshCloudPanel();
- SYNC.promise=(async function(){
- try{
- if(!quiet)notify("Sincronizando lançamentos e comprovantes…");
- var sent=await syncPush(),pushError=Cloud.err(),rows=await Cloud.fetchRows();if(!rows)throw new Error(Cloud.err());
- mergeCloudRows(rows);if(S.cfg._pendingLists&&isAdmin())await pushLists();await pullLists();SYNC.ultimo=Date.now();localStorage.setItem("grx_sync_at",String(SYNC.ultimo));renderAll();
- if(!quiet||!sent)notify(sent?"Sincronização concluída.":"Atenção: "+pendingList().length+" pendências. "+pushError);
- prefetchFotos();return sent;
- }catch(e){notify("Sincronização incompleta. "+(e.message||"Verifique a conexão")+". Dados locais preservados.");return false;}
- finally{SYNC.enviando=false;SYNC.promise=null;refreshCloudPanel();}
- })();return SYNC.promise;
-}
-async function syncFull(){
- if(!Cloud.on()||SYNC.enviando||S.saving)return;
- var next=S.regs.map(function(r){return canChange(r)?Object.assign({},r,{pend:true}):r;});if(!saveRegs(next))return notify("Não foi possível preparar o envio.");S.regs=next;
- if(isAdmin())await pushLists();return syncAll();
-}
-var prefetchRunning=false;
-async function prefetchFotos(){
- if(!Cloud.on()||prefetchRunning)return;prefetchRunning=true;
- try{for(var r of activeRegs().filter(function(x){return x.fotoPath&&!(x.fotoId&&S.fotos[x.fotoId]);}).slice(0,80)){await Cloud.ensurePhoto(r);}saveRegs(S.regs);renderAll();}finally{prefetchRunning=false;}
-}
-async function resolveConflict(id){
- if(S.saving||SYNC.enviando||!Cloud.on()||!navigator.onLine)return notify("Conecte-se e aguarde a operação atual terminar.");
- var local=S.regs.find(function(r){return r.id===id;});if(!local||!canChange(local))return;
- var remote=await Cloud.fetchOne(id);if(!remote)return notify("Não foi possível ler a versão da nuvem. Nenhum dado foi alterado.");
- var dlg=$("conflictDialog");
- function summary(r){return (r.deleted?"Excluído":"Ativo")+" · "+brl(r.valor)+" · "+(r.obs||"Sem observação")+" · revisão "+r.revision;}
- $("conflictCompare").textContent="Neste aparelho: "+summary(local)+"\n\nNa nuvem: "+summary(remote);
- $("conflictCancel").onclick=function(){dlg.close();};
- $("conflictRemote").onclick=function(){
- if(!confirm("Descartar esta alteração local e usar o registro da nuvem? Exporte um backup se precisar preservar as duas versões."))return;
- if(remote.fotoPath===local.fotoPath)remote.fotoId=local.fotoId;
- var next=S.regs.map(function(r){return r.id===id?remote:r;});if(!saveRegs(next))return notify("Falha de armazenamento. Nada foi alterado.");S.regs=next;dlg.close();renderAll();prefetchFotos();notify("Versão da nuvem aplicada.");
- };
- $("conflictLocal").onclick=function(){
- if(!confirm("Reenviar sua versão sobre a revisão atual da nuvem? A autoria original será mantida."))return;
- var nextRec=Object.assign({},local,{revision:remote.revision,cloudSaved:true,pend:true,syncError:""}),next=S.regs.map(function(r){return r.id===id?nextRec:r;});
- if(!saveRegs(next))return notify("Falha de armazenamento. Nada foi alterado.");S.regs=next;dlg.close();syncAll();
- };
- dlg.showModal();
-}
-function fmtAgo(ts){return !ts?"nunca":new Date(ts).toLocaleString("pt-BR");}
-function refreshCloudPanel(){
- if(!$("cloudState"))return;
- var st=Cloud.status(),n=pendingList().length;
- var label={off:"Somente este aparelho",err:"Nuvem com erro",auth:"Nuvem: login necessário",waiting:"Nuvem: aguardando verificação",on:"Nuvem verificada"}[st];
- $("cloudState").textContent=SYNC.enviando?"Sincronizando…":label;$("cloudState").className="pill "+(st==="on"?"on":st==="err"?"bad":"off");
- $("cloudHint").textContent=Cloud.configured()?"Supabase Auth + membros autorizados. Última sincronização: "+fmtAgo(SYNC.ultimo)+". "+n+" pendências. "+(S.cfg._pendingLists?"Cadastros aguardando envio. ":"")+(Cloud.err()?"Último erro: "+Cloud.err():""):"Dados locais deste navegador. Exporte backups regularmente. Configure config.js e execute supabase.sql para equipe.";
- $("syncBtn").disabled=!Cloud.on()||SYNC.enviando;$("pushBtn").disabled=!Cloud.on()||SYNC.enviando;
- $("statusMode").textContent=Cloud.configured()?"Nuvem segura · "+n+" pendências":"Modo local · "+activeRegs().length+" lançamentos";
- $("statusNetwork").textContent=navigator.onLine?"Online":"Sem conexão · dados locais";document.body.classList.toggle("offline",!navigator.onLine);
- if($("cloudIssues"))$("cloudIssues").innerHTML=pendingList().filter(function(r){return r.syncError;}).map(function(r){return '<p class="security-note" style="margin:12px 0">'+esc(r.id)+': '+esc(r.syncError)+(canChange(r)&&/^Conflito:/.test(r.syncError)?'<br><button type="button" class="linkbtn" data-resolve="'+esc(r.id)+'">Rever conflito</button>':'')+'</p>';}).join("");
- // Cloud list changes are administrative and authoritative, not union-merged.
- document.querySelectorAll("form[data-named], [data-delitem]").forEach(function(el){if(Cloud.configured())el.hidden=!isAdmin();});
-}
-function bootSync(){return syncAll(true);}
-function installPwa(){
- if(!("serviceWorker" in navigator)||!/^https?:$/.test(location.protocol))return;
- navigator.serviceWorker.register("./sw.js").then(function(reg){
- function ready(worker){if(!worker||!navigator.serviceWorker.controller)return;$("updateBtn").hidden=false;$("updateBtn").onclick=function(){if(S.saving||SYNC.enviando||S.editId||$("mValor").value||$("aValor").value||$("mObs").value||$("aObs").value||S.manut.itens.length||S.manut.foto||S.alim.foto)return notify("Salve ou limpe seu formulário antes de atualizar.");worker.postMessage({type:"ACTIVATE"});};}
- ready(reg.waiting);reg.addEventListener("updatefound",function(){var w=reg.installing;w.addEventListener("statechange",function(){if(w.state==="installed")ready(w);});});
- }).catch(function(){notify("Uso offline não foi ativado neste navegador. O app continua funcionando online.");});
- var refreshing=false;navigator.serviceWorker.addEventListener("controllerchange",function(){if(!refreshing){refreshing=true;location.reload();}});
-}
-
-/* ================= boot ================= */
-async function boot(){
- try{
- var probe="grx_probe";localStorage.setItem(probe,"1");localStorage.removeItem(probe);
- S.cfg=loadCfg();S.regs=loadRegs();
- // Cloud data lives in an isolated local namespace; enabling cloud never uploads old device data implicitly.
- if(Cloud.configured()){
-  var scope=sha256hex(GRX_BACKEND.url).slice(0,12);CFG_KEY="grx_cloud_cfg_"+scope;REGS_KEY="grx_cloud_regs_"+scope;SESSION_KEY="grx_cloud_session_"+scope;
-  S.cfg=loadCfg();S.regs=loadRegs();
- }
- SYNC.ultimo=Number(localStorage.getItem("grx_sync_at"))||0;Cloud.init();
- if(Cloud.configured()){
-  try{if(!await Cloud.restore())S.session=null;}catch(e){S.session=null;notify(e.message||"Entre novamente para acessar a nuvem.");}
- }else{var sess=loadSession();if(sess&&S.cfg.users.some(function(u){return u.email===sess&&u.passHash;}))S.session=sess;}
- bind();
- if(S.session){showApp();renderAll();bootSync();}else{showLogin();refreshCloudPanel();}
- for(var r of S.regs){if(r.fotoId){var d=await getFoto(r.fotoId);if(safeImg(d))S.fotos[r.fotoId]=d;}}
- if(S.session)renderAll();
- window.addEventListener("online",function(){refreshCloudPanel();if(S.session)syncAll(true);});window.addEventListener("offline",refreshCloudPanel);
- window.addEventListener("beforeunload",function(e){if(S.saving||S.photoLoading||S.editId||$("mValor").value||$("aValor").value||$("mObs").value||$("aObs").value||S.manut.itens.length||S.manut.foto||S.alim.foto){e.preventDefault();e.returnValue="";}});
- // Avoid stale tabs overwriting newer data: updates invalidate the old tab before any next write.
- window.addEventListener("storage",function(e){if(e.key===REGS_KEY||e.key===CFG_KEY){S.stale=true;$("statusMode").textContent="Dados alterados em outra aba. Recarregue antes de continuar.";document.querySelectorAll("form button, [data-del], [data-edit], #syncBtn, #pushBtn, #impBtn").forEach(function(b){b.disabled=true;});notify("Outra aba alterou os dados. Recarregue esta aba para evitar sobrescrita.");}});
- installPwa();
- }catch(e){$("splash").hidden=true;$("loginView").hidden=false;$("loginForm").hidden=true;document.querySelector("details.first").hidden=true;$("loginSecurity").textContent=e.message||"Falha ao iniciar. Não apague os dados do navegador; recupere seu backup.";}
-}
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
-
+window.addEventListener("DOMContentLoaded",init);
 })();
 </script>
-
 </body>
 </html>
