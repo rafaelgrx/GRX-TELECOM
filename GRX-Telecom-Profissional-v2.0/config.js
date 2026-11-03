@@ -1,8 +1,7 @@
-/* GRX 2.0 — chave publishable é pública; NUNCA use service_role.
-   Configure o projeto Supabase e execute supabase.sql antes de usar a nuvem. */
+/* GRX 2.0 — Supabase is configured separately. Do not put service_role here. */
 window.GRX_CONFIG = {
-  url: "https://cciioxipmmoajgdezikh.supabase.co",
-  anonKey: "sb_publishable_BqRiSTGH9DSC7pqhdQMLGg_-YpnGc6W",
+  url: "",
+  anonKey: "",
   bucket: "grx-comprovantes-v2",
   table: "grx_regs_v2",
   cfgTable: "grx_config_v2",
